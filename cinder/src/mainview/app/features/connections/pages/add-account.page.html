@@ -66,53 +66,87 @@
 		@case ("google-user") {
 			<section class="account-type-panel" aria-labelledby="google-title">
 				<h2 id="google-title" class="panel-title">Google account</h2>
-				<p class="panel-text">Cinder signs in through an OAuth client from your own Google Cloud project:</p>
-				<ol class="steps">
-					<li>
-						In the Google Cloud console, open <strong>APIs &amp; Services › Credentials</strong> and create an OAuth
-						client ID of type <strong>Desktop app</strong>.
-					</li>
-					<li>In the same project, enable the <strong>Cloud Firestore API</strong> and the <strong>Firebase Management API</strong>.</li>
-					<li>While the OAuth consent screen is in testing, add your Google account as a test user.</li>
-					<li>Paste the client ID and client secret here.</li>
-				</ol>
 				@let oauthClient = store.oauthClient();
 				@if (oauthClient.status === "loading") {
-					<p class="panel-text">Loading the saved OAuth client…</p>
+					<p class="panel-text">Loading the OAuth client…</p>
 				} @else if (oauthClient.status === "failed") {
 					<p class="form-error" role="alert">{{ oauthClient.error }}</p>
-				} @else if (oauthClient.value && !isEditingOAuthClient()) {
-					<div class="saved-client">
-						<span class="saved-client-label">OAuth client</span>
-						<code class="saved-client-id">{{ oauthClient.value.clientId }}</code>
-						<button type="button" class="button-secondary" (click)="isEditingOAuthClient.set(true)">Change</button>
-					</div>
-					@if (error(); as message) {
-						<p class="form-error" role="alert">{{ message }}</p>
-					}
-					<div class="form-actions">
-						@if (store.isSigningIn()) {
-							<span class="panel-text" role="status">Finish signing in in your browser…</span>
-							<button type="button" class="button-secondary" (click)="cancelGoogleSignIn()">Cancel sign-in</button>
-						} @else {
-							<button type="button" class="button-primary" [disabled]="isPending()" (click)="signInWithGoogle()">
-								<lucide-icon name="log-in" />
-								Sign in with Google
-							</button>
-						}
-					</div>
 				} @else {
+					@let settings = oauthClient.value;
+					@if (settings.hasBuiltInClient) {
+						<p class="panel-text">
+							Cinder opens your browser to sign in with Google, then lists the Firebase projects the account can see.
+						</p>
+					} @else {
+						<p class="panel-text">Cinder signs in through an OAuth client from your own Google Cloud project:</p>
+						<ng-container [ngTemplateOutlet]="oauthClientSteps" />
+					}
+					@if (settings.source === "user" && !isEditingOAuthClient()) {
+						<div class="saved-client">
+							<span class="saved-client-label">OAuth client</span>
+							<code class="saved-client-id">{{ settings.clientId }}</code>
+							<button type="button" class="button-secondary" (click)="isEditingOAuthClient.set(true)">Change</button>
+							@if (settings.hasBuiltInClient) {
+								<button type="button" class="button-secondary" [disabled]="isPending()" (click)="removeOAuthClient()">
+									Use built-in client
+								</button>
+							}
+						</div>
+					}
 					@if (error(); as message) {
 						<p class="form-error" role="alert">{{ message }}</p>
 					}
-					<app-oauth-client-form
-						[isPending]="isPending()"
-						[canCancel]="oauthClient.value !== null"
-						(saved)="saveOAuthClient($event)"
-						(canceled)="isEditingOAuthClient.set(false)"
-					/>
+					@if (settings.source === "built-in" || (settings.source === "user" && !isEditingOAuthClient())) {
+						<div class="form-actions">
+							@if (store.isSigningIn()) {
+								<span class="panel-text" role="status">Finish signing in in your browser…</span>
+								<button type="button" class="button-secondary" (click)="cancelGoogleSignIn()">Cancel sign-in</button>
+							} @else {
+								<button type="button" class="button-primary" [disabled]="isPending()" (click)="signInWithGoogle()">
+									<lucide-icon name="log-in" />
+									Sign in with Google
+								</button>
+							}
+						</div>
+					}
+					@if (settings.source === "built-in") {
+						<button
+							type="button"
+							class="own-client-toggle"
+							aria-controls="own-oauth-client"
+							[attr.aria-expanded]="isEditingOAuthClient()"
+							(click)="isEditingOAuthClient.set(!isEditingOAuthClient())"
+						>
+							<lucide-icon [name]="isEditingOAuthClient() ? 'chevron-down' : 'chevron-right'" />
+							Use your own OAuth client
+						</button>
+					}
+					@if (settings.source === "none" || isEditingOAuthClient()) {
+						<div id="own-oauth-client" class="own-oauth-client">
+							@if (settings.source === "built-in") {
+								<ng-container [ngTemplateOutlet]="oauthClientSteps" />
+							}
+							<app-oauth-client-form
+								[isPending]="isPending()"
+								[canCancel]="settings.source !== 'none'"
+								(saved)="saveOAuthClient($event)"
+								(canceled)="isEditingOAuthClient.set(false)"
+							/>
+						</div>
+					}
 				}
 			</section>
 		}
 	}
 </section>
+<ng-template #oauthClientSteps>
+	<ol class="steps">
+		<li>
+			In the Google Cloud console, open <strong>APIs &amp; Services › Credentials</strong> and create an OAuth client ID of
+			type <strong>Desktop app</strong>.
+		</li>
+		<li>In the same project, enable the <strong>Cloud Firestore API</strong> and the <strong>Firebase Management API</strong>.</li>
+		<li>While the OAuth consent screen is in testing, add your Google account as a test user.</li>
+		<li>Paste the client ID and client secret here.</li>
+	</ol>
+</ng-template>

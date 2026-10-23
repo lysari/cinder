@@ -8,3 +8,4 @@ artifacts/
 *.log
 .DS_Store
 .cottontail-tmp/
+google-oauth-client.local.json

@@ -38,7 +38,7 @@ cinder/
 │           ├── app.component.ts        # Mounts the router only
 │           ├── app.config.ts
 │           └── app.routes.ts
-├── scripts/                            # Build-time scripts (generate-icon.ts draws icon.iconset/)
+├── scripts/                            # Build-time scripts (generate-icon.ts draws icon.iconset/, built-in-oauth-client.ts reads the bundled OAuth client)
 ├── icon.iconset/                       # Generated macOS app icon, all sizes
 ├── tests/                              # bun:test suites mirroring src/ and scripts/
 └── docs/                               # Per-page and per-file docs, git-ignored

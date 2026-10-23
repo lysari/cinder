@@ -18,7 +18,7 @@ export class AccountsStore {
 	private readonly projects = signal<Record<string, Loadable<Project[]>>>({});
 	private readonly databases = signal<Record<string, Loadable<ProjectDatabases>>>({});
 	readonly accounts = signal<Loadable<AccountSummary[]>>({ status: "loading" });
-	readonly oauthClient = signal<Loadable<OAuthClientSettings | null>>({ status: "loading" });
+	readonly oauthClient = signal<Loadable<OAuthClientSettings>>({ status: "loading" });
 	readonly isSigningIn = signal(false);
 
 	async loadAccounts(): Promise<void> {
@@ -40,7 +40,11 @@ export class AccountsStore {
 	async signInWithGoogle(): Promise<void> {
 		this.isSigningIn.set(true);
 		try {
-			this.addToList(await this.rpc.request.signInWithGoogle(undefined, WAIT_FOR_USER));
+			const account = await this.rpc.request.signInWithGoogle(undefined, WAIT_FOR_USER);
+			this.addToList(account);
+			if (this.projectsOf(account.id)?.status === "failed") {
+				void this.loadProjects(account.id);
+			}
 		} finally {
 			this.isSigningIn.set(false);
 		}
@@ -100,10 +104,21 @@ export class AccountsStore {
 		this.oauthClient.set({ status: "loaded", value: await this.rpc.request.setOAuthClient(oauthClient) });
 	}
 
+	async removeOAuthClient(): Promise<void> {
+		this.oauthClient.set({ status: "loaded", value: await this.rpc.request.removeOAuthClient() });
+	}
+
 	private addToList(account: AccountSummary): void {
-		this.accounts.update((accounts) =>
-			accounts.status === "loaded" ? { ...accounts, value: [...accounts.value, account] } : accounts,
-		);
+		this.accounts.update((accounts) => {
+			if (accounts.status !== "loaded") {
+				return accounts;
+			}
+			const isReplaced = accounts.value.some(({ id }) => id === account.id);
+			const value = isReplaced
+				? accounts.value.map((existing) => (existing.id === account.id ? account : existing))
+				: [...accounts.value, account];
+			return { ...accounts, value };
+		});
 	}
 }
 

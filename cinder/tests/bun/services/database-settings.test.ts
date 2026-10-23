@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { resolveDatabaseSettings } from "../../../src/bun/services/database-settings";
-import type { DatabaseTarget } from "../../../src/shared/interfaces/account.interface";
+import type { DatabaseTarget, GoogleUserAccount } from "../../../src/shared/interfaces/account.interface";
 
 const TARGET: DatabaseTarget = { accountId: "account-1", projectId: "demo-cinder", databaseId: "(default)" };
 
@@ -45,7 +45,9 @@ describe("resolveDatabaseSettings", () => {
 				type: "google-user",
 				email: "dara@example.com",
 				refreshToken: "test-refresh-token",
-				oauthClient: { clientId: "test-client-id", clientSecret: "test-client-secret" },
+				oauthClientSource: "user",
+				oauthClientId: "test-client-id",
+				oauthClientSecret: "test-client-secret",
 			},
 			TARGET,
 		);
@@ -60,5 +62,20 @@ describe("resolveDatabaseSettings", () => {
 				refresh_token: "test-refresh-token",
 			},
 		});
+	});
+
+	test("asks a Google user whose client secret is unavailable to sign in again", () => {
+		const account: GoogleUserAccount = {
+			id: "account-1",
+			type: "google-user",
+			email: "dara@example.com",
+			refreshToken: "test-refresh-token",
+			oauthClientSource: "built-in",
+			oauthClientId: "built-in-client.apps.googleusercontent.com",
+			oauthClientSecret: null,
+		};
+		expect(() => resolveDatabaseSettings(account, TARGET)).toThrow(
+			"dara@example.com was signed in with an OAuth client this build of Cinder does not include. Sign in again with Google to use it.",
+		);
 	});
 });

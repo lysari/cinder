@@ -39,8 +39,9 @@ type BunRequests = {
 	addEmulatorAccount: { params: EmulatorAccountForm; response: AccountSummary };
 	importServiceAccount: { params: undefined; response: AccountSummary | null };
 	removeAccount: { params: AccountParams; response: void };
-	getOAuthClient: { params: undefined; response: OAuthClientSettings | null };
+	getOAuthClient: { params: undefined; response: OAuthClientSettings };
 	setOAuthClient: { params: OAuthClient; response: OAuthClientSettings };
+	removeOAuthClient: { params: undefined; response: OAuthClientSettings };
 	signInWithGoogle: { params: undefined; response: AccountSummary };
 	cancelGoogleSignIn: { params: undefined; response: void };
 	listProjects: { params: AccountParams; response: Project[] };

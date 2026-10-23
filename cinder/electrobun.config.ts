@@ -1,5 +1,9 @@
 import type { ElectrobunConfig } from "electrobun";
+import { join } from "node:path";
 import { version } from "./package.json";
+import { BUILT_IN_OAUTH_CLIENT_FILE, readBuiltInOAuthClient } from "./scripts/built-in-oauth-client";
+
+const builtInOAuthClient = await readBuiltInOAuthClient(join(import.meta.dir, BUILT_IN_OAUTH_CLIENT_FILE));
 
 export default {
 	app: {
@@ -11,6 +15,7 @@ export default {
 		mainProcess: "bun",
 		bun: {
 			entrypoint: "src/bun/index.ts",
+			define: { BUILT_IN_OAUTH_CLIENT: JSON.stringify(builtInOAuthClient) },
 		},
 		copy: {
 			"dist/index.html": "views/mainview/index.html",

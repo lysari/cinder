@@ -1,7 +1,7 @@
 import Electrobun, { ApplicationMenu, BrowserView, BrowserWindow, PATHS, Screen, Utils } from "electrobun/main";
 import { join, relative } from "node:path";
 import { MENU_ACTIONS } from "../shared/constants/menu";
-import type { Account } from "../shared/interfaces/account.interface";
+import type { Account, OAuthClient } from "../shared/interfaces/account.interface";
 import type { WindowFrame } from "../shared/interfaces/app-state.interface";
 import type { AppRpcSchema } from "../shared/interfaces/rpc.interface";
 import {
@@ -38,11 +38,14 @@ import { TASK_CONCURRENCY, TaskQueue } from "./services/task-queue";
 import { parseTaskRequest } from "./task-request-parser";
 import { parseViewState, parseWindowFrame, tabUrlOfLink } from "./view-state-parser";
 
+declare const BUILT_IN_OAUTH_CLIENT: OAuthClient | null;
+
 const DEFAULT_WINDOW_SIZE = { width: 1280, height: 800 };
 
 const accountStorage = new AccountStorage({
 	filePath: join(Utils.paths.userData, "accounts.json"),
 	keychainService: relative(Utils.paths.appData, Utils.paths.userData),
+	builtInOAuthClient: BUILT_IN_OAUTH_CLIENT,
 });
 await accountStorage.load();
 
@@ -195,13 +198,25 @@ const rpc = BrowserView.defineRPC<AppRpcSchema>({
 			},
 			getOAuthClient: () => accountStorage.getOAuthClientSettings(),
 			setOAuthClient: (params) => accountStorage.setOAuthClient(parseOAuthClient(params)),
+			removeOAuthClient: () => accountStorage.removeOAuthClient(),
 			signInWithGoogle: async () => {
-				const oauthClient = accountStorage.getOAuthClient();
-				if (!oauthClient) {
+				const activeClient = accountStorage.getOAuthClient();
+				if (!activeClient) {
 					throw new Error("Save your OAuth client before signing in with Google.");
 				}
+				const { source, oauthClient } = activeClient;
 				const { email, refreshToken } = await googleSignIn.start(oauthClient);
-				return accountStorage.add({ id: crypto.randomUUID(), type: "google-user", email, refreshToken, oauthClient });
+				const summary = await accountStorage.addGoogleUser({
+					id: crypto.randomUUID(),
+					type: "google-user",
+					email,
+					refreshToken,
+					oauthClientSource: source,
+					oauthClientId: oauthClient.clientId,
+					oauthClientSecret: oauthClient.clientSecret,
+				});
+				browseSessions.closeAccount(summary.id);
+				return summary;
 			},
 			cancelGoogleSignIn: () => googleSignIn.cancel(),
 			listProjects: (params) => listProjects(requireAccount(parseAccountParams(params).accountId)),

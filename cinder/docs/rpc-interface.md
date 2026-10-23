@@ -12,8 +12,9 @@ Webview → main requests:
 | `addEmulatorAccount` | `EmulatorAccountForm` | `AccountSummary` |
 | `importServiceAccount` | none (opens a file dialog) | `AccountSummary`, or `null` when the dialog is canceled |
 | `removeAccount` | `{ accountId }` | nothing (deletes the keychain secrets too) |
-| `getOAuthClient` | none | `{ clientId }` or `null`; never the secret |
-| `setOAuthClient` | `{ clientId, clientSecret }` | `{ clientId }` |
+| `getOAuthClient` | none | `OAuthClientSettings` `{ source, clientId, hasBuiltInClient }`; never a secret |
+| `setOAuthClient` | `{ clientId, clientSecret }` | `OAuthClientSettings` |
+| `removeOAuthClient` | none | `OAuthClientSettings` (the saved client and its keychain secret are deleted) |
 | `signInWithGoogle` | none | `AccountSummary` once the browser flow ends |
 | `cancelGoogleSignIn` | none | nothing |
 | `listProjects` | `{ accountId }` | `Project[]` |

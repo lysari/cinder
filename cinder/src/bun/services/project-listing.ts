@@ -2,6 +2,7 @@ import { JWT, OAuth2Client } from "google-auth-library";
 import type { Account, GoogleUserAccount, ServiceAccount } from "../../shared/interfaces/account.interface";
 import type { Project, ProjectDatabases } from "../../shared/interfaces/project.interface";
 import { isNonEmptyString, isObject } from "../../shared/utils/type-guards";
+import { SIGN_IN_AGAIN_MESSAGE } from "./database-settings";
 
 const FIREBASE_API_URL = "https://firebase.googleapis.com";
 const FIRESTORE_API_URL = "https://firestore.googleapis.com";
@@ -84,7 +85,10 @@ function createAuthClient(account: ServiceAccount | GoogleUserAccount): JWT | OA
 	if (account.type === "service-account") {
 		return new JWT({ email: account.clientEmail, key: account.privateKey, scopes: [CLOUD_PLATFORM_SCOPE] });
 	}
-	const client = new OAuth2Client({ clientId: account.oauthClient.clientId, clientSecret: account.oauthClient.clientSecret });
+	if (account.oauthClientSecret === null) {
+		throw new Error(`${account.email} ${SIGN_IN_AGAIN_MESSAGE}`);
+	}
+	const client = new OAuth2Client({ clientId: account.oauthClientId, clientSecret: account.oauthClientSecret });
 	client.setCredentials({ refresh_token: account.refreshToken });
 	return client;
 }

@@ -6,7 +6,7 @@ Keeps one long-lived browse session process per database target (account id, pro
 
 | Event | What happens |
 |---|---|
-| First request for a target | Spawns `process.execPath <worker.js> --browse-session` with JSON IPC, sends `{ settings }` (the account resolved into `DatabaseSettings`), then the request |
+| First request for a target | Resolves the account into `DatabaseSettings` (a Google user whose built-in OAuth client this build lacks rejects the request with "Sign in again" and starts no process), spawns `process.execPath <worker.js> --browse-session` with JSON IPC, sends `{ settings }`, then the request |
 | Each request | Gets the next numeric request id and its own timer (`BROWSE_REQUEST_TIMEOUT_MS`, 30 s); the idle timer stops |
 | Response | Settles the pending request with the result or an `Error` carrying the worker's message; a response for an id that already timed out is dropped |
 | Timeout | Rejects with "Firestore did not answer within N seconds."; the process keeps running and later answers are dropped |

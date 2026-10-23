@@ -2,7 +2,7 @@ import { GeoPoint, Timestamp } from "@google-cloud/firestore";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { BrowseSessions } from "../../../src/bun/services/browse-sessions";
-import type { DatabaseTarget, EmulatorAccount } from "../../../src/shared/interfaces/account.interface";
+import type { DatabaseTarget, EmulatorAccount, GoogleUserAccount } from "../../../src/shared/interfaces/account.interface";
 import type { DocumentPage } from "../../../src/shared/interfaces/browse.interface";
 import type { LiveChanges, LiveUpdate } from "../../../src/shared/interfaces/live.interface";
 import type { QueryCursor, QueryFilter, StructuredQuery } from "../../../src/shared/interfaces/query.interface";
@@ -12,6 +12,15 @@ const WORKER_PATH = join(import.meta.dir, "../../../src/worker/index.ts");
 const PROJECT_ID = "demo-cinder";
 const ACCOUNT: EmulatorAccount = { id: "emulator", type: "emulator", host: "127.0.0.1", port: 8080, projectIds: [PROJECT_ID] };
 const UNREACHABLE_ACCOUNT: EmulatorAccount = { ...ACCOUNT, id: "unreachable", port: 1 };
+const SIGNED_OUT_ACCOUNT: GoogleUserAccount = {
+	id: "signed-out",
+	type: "google-user",
+	email: "dara@example.com",
+	refreshToken: "test-refresh-token",
+	oauthClientSource: "built-in",
+	oauthClientId: "built-in-client.apps.googleusercontent.com",
+	oauthClientSecret: null,
+};
 const DATABASE: DatabaseTarget = { accountId: ACCOUNT.id, projectId: PROJECT_ID, databaseId: "(default)" };
 const COLLECTION = `browse-sessions-test-${crypto.randomUUID()}`;
 const PAGED_COLLECTION = `${COLLECTION}/paged/items`;
@@ -35,7 +44,7 @@ function createSessions(options: { requestTimeoutMs?: number; idleTimeoutMs?: nu
 		workerPath: WORKER_PATH,
 		requestTimeoutMs: options.requestTimeoutMs ?? 10_000,
 		idleTimeoutMs: options.idleTimeoutMs ?? 60_000,
-		findAccount: (accountId) => [ACCOUNT, UNREACHABLE_ACCOUNT].find((account) => account.id === accountId),
+		findAccount: (accountId) => [ACCOUNT, UNREACHABLE_ACCOUNT, SIGNED_OUT_ACCOUNT].find((account) => account.id === accountId),
 		onSessionEnd: (target, reason) => endedSessions.push({ target, reason }),
 		onLiveUpdate: (update) => liveUpdates.push(update),
 	});
@@ -261,6 +270,17 @@ describe("BrowseSessions", () => {
 		await expect(
 			sessions.request({ type: "getDocument", params: { database: { ...DATABASE, accountId: "unknown" }, documentPath: "a/b" } }),
 		).rejects.toThrow("Account unknown was not found.");
+	});
+
+	test("asks a Google account to sign in again without starting a session process", async () => {
+		const pidsBefore = browseSessionPids();
+		await expect(
+			sessions.request({
+				type: "getDocument",
+				params: { database: { ...DATABASE, accountId: SIGNED_OUT_ACCOUNT.id }, documentPath: "a/b" },
+			}),
+		).rejects.toThrow("Sign in again with Google to use it.");
+		expect(browseSessionPids()).toEqual(pidsBefore);
 	});
 
 	test("starts a new process after the session process crashes", async () => {

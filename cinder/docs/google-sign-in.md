@@ -1,6 +1,6 @@
 # src/bun/services/google-sign-in.ts
 
-Signs a Google user in with the loopback flow for installed apps, using the OAuth client the user saved in settings.
+Signs a Google user in with the loopback flow for installed apps, using the active OAuth client: the one the user saved in settings, otherwise the client built into the app (`built-in-oauth-client.md`). The caller passes the client; this file does not know where it came from.
 
 ## Flow
 

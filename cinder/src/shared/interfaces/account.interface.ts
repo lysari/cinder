@@ -25,16 +25,22 @@ export interface OAuthClient {
 	clientSecret: string;
 }
 
+export type OAuthClientSource = "user" | "built-in";
+
 export interface GoogleUserAccount {
 	id: string;
 	type: "google-user";
 	email: string;
 	refreshToken: string;
-	oauthClient: OAuthClient;
+	oauthClientSource: OAuthClientSource;
+	oauthClientId: string;
+	oauthClientSecret: string | null;
 }
 
 export interface OAuthClientSettings {
-	clientId: string;
+	source: OAuthClientSource | "none";
+	clientId: string | null;
+	hasBuiltInClient: boolean;
 }
 
 export type Account = EmulatorAccount | ServiceAccount | GoogleUserAccount;

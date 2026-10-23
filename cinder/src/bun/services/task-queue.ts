@@ -83,6 +83,18 @@ export class TaskQueue {
 			this.report(taskId, "failed", `Account ${missingAccountId} was not found.`);
 			return;
 		}
+		let message: WorkerTaskMessage;
+		try {
+			message = {
+				taskId,
+				request,
+				settings: resolveDatabaseSettings(account, request.database),
+				destinationSettings: destination && destinationAccount ? resolveDatabaseSettings(destinationAccount, destination) : null,
+			};
+		} catch (error) {
+			this.report(taskId, "failed", error instanceof Error ? error.message : String(error));
+			return;
+		}
 		const worker = Bun.spawn([process.execPath, this.options.workerPath], {
 			ipc: (update: TaskUpdate) => this.handleUpdate(runningTask, update),
 			serialization: "json",
@@ -98,12 +110,6 @@ export class TaskQueue {
 			isDone: false,
 		};
 		this.runningTasks.set(taskId, runningTask);
-		const message: WorkerTaskMessage = {
-			taskId,
-			request,
-			settings: resolveDatabaseSettings(account, request.database),
-			destinationSettings: destination && destinationAccount ? resolveDatabaseSettings(destinationAccount, destination) : null,
-		};
 		worker.send(message);
 		this.report(taskId, "running", null);
 		void worker.exited.then(() => this.handleExit(runningTask));

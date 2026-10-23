@@ -9,12 +9,14 @@ Runs tasks in worker processes, at most `concurrency` at a time, first in, first
 | `queued` | queue | `start` adds the task |
 | `running` | queue, then worker | the worker process is spawned; the worker repeats it with new log entries |
 | `done` / `failed` | worker | the task ends normally |
-| `failed` | queue | the account (or a copy's destination account) is unknown, or the worker exits without a final update |
+| `failed` | queue | the account (or a copy's destination account) is unknown or cannot be resolved into settings (a Google user whose built-in OAuth client this build lacks: "Sign in again"), or the worker exits without a final update |
 | `canceled` | queue | `cancel` on a queued task, or the killed worker has exited |
 
 Each `TaskUpdate` is forwarded to `onUpdate` (the webview's `taskUpdated` message) as it arrives. Updates the queue sends itself carry no log entries and the last progress the worker reported. A forwarded update always carries the task id the queue gave the worker: the worker runs user code, so it must not be able to report for another task.
 
 ## Copies across databases
+
+The settings are resolved before the worker is spawned, so an account that cannot be resolved fails the task without starting a process.
 
 For a `copy` whose `destination.database` differs from `database`, the queue also resolves the destination account into `destinationSettings`, so a copy between two accounts gets both credentials over IPC; otherwise it sends null and the worker uses one client.
 

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from "@angular/common";
 import { Component, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { LucideAngularModule } from "lucide-angular";
@@ -9,7 +10,7 @@ import { OAuthClientFormComponent } from "../components/oauth-client-form.compon
 
 @Component({
 	selector: "app-add-account-page",
-	imports: [LucideAngularModule, EmulatorAccountFormComponent, OAuthClientFormComponent],
+	imports: [NgTemplateOutlet, LucideAngularModule, EmulatorAccountFormComponent, OAuthClientFormComponent],
 	templateUrl: "./add-account.page.html",
 	styleUrl: "./add-account.page.scss",
 })
@@ -48,6 +49,13 @@ export class AddAccountPage {
 	protected saveOAuthClient(oauthClient: OAuthClient): Promise<void> {
 		return this.run(async () => {
 			await this.store.saveOAuthClient(oauthClient);
+			this.isEditingOAuthClient.set(false);
+		});
+	}
+
+	protected removeOAuthClient(): Promise<void> {
+		return this.run(async () => {
+			await this.store.removeOAuthClient();
 			this.isEditingOAuthClient.set(false);
 		});
 	}

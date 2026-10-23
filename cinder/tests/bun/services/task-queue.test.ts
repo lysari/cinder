@@ -1,13 +1,22 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { TaskQueue } from "../../../src/bun/services/task-queue";
-import type { EmulatorAccount } from "../../../src/shared/interfaces/account.interface";
+import type { EmulatorAccount, GoogleUserAccount } from "../../../src/shared/interfaces/account.interface";
 import type { TaskRequest, TaskStatus, TaskUpdate } from "../../../src/shared/interfaces/task.interface";
 import { createFirestore } from "../../../src/worker/firestore-client";
 
 const WORKER_PATH = join(import.meta.dir, "../../../src/worker/index.ts");
 const ACCOUNT: EmulatorAccount = { id: "emulator", type: "emulator", host: "127.0.0.1", port: 8080, projectIds: ["demo-cinder"] };
 const OTHER_ACCOUNT: EmulatorAccount = { ...ACCOUNT, id: "other-emulator", projectIds: ["demo-cinder-copy"] };
+const SIGNED_OUT_ACCOUNT: GoogleUserAccount = {
+	id: "signed-out",
+	type: "google-user",
+	email: "dara@example.com",
+	refreshToken: "test-refresh-token",
+	oauthClientSource: "built-in",
+	oauthClientId: "built-in-client.apps.googleusercontent.com",
+	oauthClientSecret: null,
+};
 const PROJECT_ID = "demo-cinder";
 const COLLECTION = `task-queue-test-${crypto.randomUUID()}`;
 const ENDED_STATUSES: TaskStatus[] = ["done", "failed", "canceled"];
@@ -28,7 +37,7 @@ function createQueue(concurrency: number, workerPath = WORKER_PATH) {
 	const queue = new TaskQueue({
 		workerPath,
 		concurrency,
-		findAccount: (accountId) => [ACCOUNT, OTHER_ACCOUNT].find((account) => account.id === accountId),
+		findAccount: (accountId) => [ACCOUNT, OTHER_ACCOUNT, SIGNED_OUT_ACCOUNT].find((account) => account.id === accountId),
 		onUpdate: (update) => updates.push(update),
 		cleanUp: async (taskId) => {
 			cleanedTaskIds.push(taskId);
@@ -133,6 +142,14 @@ describe("TaskQueue", () => {
 		const taskId = queue.start(scriptRequest(sleepScript(0), "unknown"));
 		await waitForEnd(taskId);
 		expect(updates.at(-1)).toMatchObject({ status: "failed", error: "Account unknown was not found." });
+	});
+
+	test("fails a task whose Google account must sign in again without starting a worker", async () => {
+		const { queue, updates, statusesOf, waitForEnd } = createQueue(1);
+		const taskId = queue.start(scriptRequest(sleepScript(0), SIGNED_OUT_ACCOUNT.id));
+		await waitForEnd(taskId);
+		expect(statusesOf(taskId)).toEqual(["queued", "failed"]);
+		expect(updates.at(-1)?.error).toContain("Sign in again with Google to use it.");
 	});
 
 	test("copies between the databases of two accounts", async () => {

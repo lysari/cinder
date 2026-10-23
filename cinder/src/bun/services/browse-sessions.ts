@@ -114,6 +114,7 @@ export class BrowseSessions {
 		if (!account) {
 			throw new Error(`Account ${target.accountId} was not found.`);
 		}
+		const startMessage: BrowseSessionStartMessage = { settings: resolveDatabaseSettings(account, target) };
 		const worker = Bun.spawn([process.execPath, this.options.workerPath, BROWSE_SESSION_ARGUMENT], {
 			ipc: (message: BrowseWorkerMessage) =>
 				"requestId" in message ? this.handleResponse(session, message) : this.handleLiveUpdate(session, message),
@@ -122,7 +123,6 @@ export class BrowseSessions {
 		});
 		const session: BrowseSession = { key, target, worker, pendingRequests: new Map(), idleTimer: null, closeReason: null };
 		this.sessions.set(key, session);
-		const startMessage: BrowseSessionStartMessage = { settings: resolveDatabaseSettings(account, target) };
 		worker.send(startMessage);
 		void worker.exited.then(() => this.handleExit(session));
 		return session;

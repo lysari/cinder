@@ -9,6 +9,6 @@ Lists the projects of an account and the Firestore databases of a project.
 
 ## Hidden constraints
 
-- Each call gets a fresh access token from google-auth-library (`JWT` for a service account, `OAuth2Client` with the refresh token for a Google user).
+- Each call gets a fresh access token from google-auth-library (`JWT` for a service account, `OAuth2Client` with the refresh token for a Google user). A Google user whose client secret is unavailable (`oauthClientSecret: null`, see `account-storage.md`) fails with the "Sign in again" message (`SIGN_IN_AGAIN_MESSAGE` from `database-settings.ts`) before any request.
 - A Google user's API calls bill the quota of the project that owns the OAuth client, so the Firebase Management API and Cloud Firestore API must be enabled there.
 - The API base URL parameters only exist for tests.

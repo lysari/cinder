@@ -3,8 +3,10 @@ import { dirname } from "node:path";
 import type {
 	Account,
 	AccountSummary,
+	GoogleUserAccount,
 	OAuthClient,
 	OAuthClientSettings,
+	OAuthClientSource,
 } from "../../shared/interfaces/account.interface";
 import { isNonEmptyString, isObject } from "../../shared/utils/type-guards";
 
@@ -32,6 +34,12 @@ interface StoredGoogleUserAccount {
 	type: "google-user";
 	email: string;
 	oauthClientId: string;
+	oauthClientSource: OAuthClientSource;
+}
+
+interface ActiveOAuthClient {
+	source: OAuthClientSource;
+	oauthClient: OAuthClient;
 }
 
 type StoredAccount = StoredEmulatorAccount | StoredServiceAccount | StoredGoogleUserAccount;
@@ -44,11 +52,12 @@ interface AccountFile {
 interface AccountStorageOptions {
 	filePath: string;
 	keychainService: string;
+	builtInOAuthClient: OAuthClient | null;
 }
 
 export class AccountStorage {
 	private accounts: Account[] = [];
-	private oauthClient: OAuthClient | null = null;
+	private userOAuthClient: OAuthClient | null = null;
 
 	constructor(private readonly options: AccountStorageOptions) {}
 
@@ -65,7 +74,7 @@ export class AccountStorage {
 		}
 		const clientSecret = file.oauthClientId ? await this.getSecret(OAUTH_CLIENT_SECRET_NAME) : null;
 		this.accounts = accounts;
-		this.oauthClient = file.oauthClientId && clientSecret ? { clientId: file.oauthClientId, clientSecret } : null;
+		this.userOAuthClient = file.oauthClientId && clientSecret ? { clientId: file.oauthClientId, clientSecret } : null;
 	}
 
 	list(): AccountSummary[] {
@@ -87,7 +96,7 @@ export class AccountStorage {
 		}
 		const accounts = [...this.accounts, account];
 		try {
-			await this.writeFile(accounts, this.oauthClient?.clientId ?? null);
+			await this.writeFile(accounts, this.userOAuthClient?.clientId ?? null);
 		} catch (error) {
 			await this.deleteSecret(account.id);
 			throw error;
@@ -96,26 +105,59 @@ export class AccountStorage {
 		return summary;
 	}
 
+	async addGoogleUser(account: GoogleUserAccount): Promise<AccountSummary> {
+		const existing = this.accounts.find((stored) => stored.type === "google-user" && stored.email === account.email);
+		if (!existing) {
+			return this.add(account);
+		}
+		const replacement: GoogleUserAccount = { ...account, id: existing.id };
+		const accounts = this.accounts.map((stored) => (stored === existing ? replacement : stored));
+		await this.setSecret(existing.id, JSON.stringify(secretsOf(replacement)));
+		try {
+			await this.writeFile(accounts, this.userOAuthClient?.clientId ?? null);
+		} catch (error) {
+			await this.setSecret(existing.id, JSON.stringify(secretsOf(existing)));
+			throw error;
+		}
+		this.accounts = accounts;
+		return toAccountSummary(replacement);
+	}
+
 	async remove(accountId: string): Promise<void> {
 		const accounts = this.accounts.filter((account) => account.id !== accountId);
-		await this.writeFile(accounts, this.oauthClient?.clientId ?? null);
+		await this.writeFile(accounts, this.userOAuthClient?.clientId ?? null);
 		this.accounts = accounts;
 		await this.deleteSecret(accountId);
 	}
 
-	getOAuthClient(): OAuthClient | null {
-		return this.oauthClient;
+	getOAuthClient(): ActiveOAuthClient | null {
+		if (this.userOAuthClient) {
+			return { source: "user", oauthClient: this.userOAuthClient };
+		}
+		const { builtInOAuthClient } = this.options;
+		return builtInOAuthClient ? { source: "built-in", oauthClient: builtInOAuthClient } : null;
 	}
 
-	getOAuthClientSettings(): OAuthClientSettings | null {
-		return this.oauthClient ? { clientId: this.oauthClient.clientId } : null;
+	getOAuthClientSettings(): OAuthClientSettings {
+		const hasBuiltInClient = this.options.builtInOAuthClient !== null;
+		if (this.userOAuthClient) {
+			return { source: "user", clientId: this.userOAuthClient.clientId, hasBuiltInClient };
+		}
+		return { source: hasBuiltInClient ? "built-in" : "none", clientId: null, hasBuiltInClient };
 	}
 
 	async setOAuthClient(oauthClient: OAuthClient): Promise<OAuthClientSettings> {
 		await this.setSecret(OAUTH_CLIENT_SECRET_NAME, oauthClient.clientSecret);
 		await this.writeFile(this.accounts, oauthClient.clientId);
-		this.oauthClient = oauthClient;
-		return { clientId: oauthClient.clientId };
+		this.userOAuthClient = oauthClient;
+		return this.getOAuthClientSettings();
+	}
+
+	async removeOAuthClient(): Promise<OAuthClientSettings> {
+		await this.writeFile(this.accounts, null);
+		this.userOAuthClient = null;
+		await this.deleteSecret(OAUTH_CLIENT_SECRET_NAME);
+		return this.getOAuthClientSettings();
 	}
 
 	private async readFile(): Promise<AccountFile> {
@@ -146,16 +188,16 @@ export class AccountStorage {
 		if (storedAccount.type === "service-account") {
 			return isNonEmptyString(secrets.privateKey) ? { ...storedAccount, privateKey: secrets.privateKey } : null;
 		}
-		if (!isNonEmptyString(secrets.refreshToken) || !isNonEmptyString(secrets.clientSecret)) {
+		if (!isNonEmptyString(secrets.refreshToken)) {
 			return null;
 		}
-		return {
-			id: storedAccount.id,
-			type: "google-user",
-			email: storedAccount.email,
-			refreshToken: secrets.refreshToken,
-			oauthClient: { clientId: storedAccount.oauthClientId, clientSecret: secrets.clientSecret },
-		};
+		const { id, email, oauthClientSource, oauthClientId } = storedAccount;
+		const account = { id, type: "google-user" as const, email, refreshToken: secrets.refreshToken, oauthClientSource, oauthClientId };
+		if (oauthClientSource === "built-in") {
+			const { builtInOAuthClient } = this.options;
+			return { ...account, oauthClientSecret: builtInOAuthClient?.clientId === oauthClientId ? builtInOAuthClient.clientSecret : null };
+		}
+		return isNonEmptyString(secrets.clientSecret) ? { ...account, oauthClientSecret: secrets.clientSecret } : null;
 	}
 
 	private getSecret(name: string): Promise<string | null> {
@@ -189,7 +231,13 @@ function toStoredAccount(account: Account): StoredAccount {
 		case "service-account":
 			return { id: account.id, type: account.type, projectId: account.projectId, clientEmail: account.clientEmail };
 		case "google-user":
-			return { id: account.id, type: account.type, email: account.email, oauthClientId: account.oauthClient.clientId };
+			return {
+				id: account.id,
+				type: account.type,
+				email: account.email,
+				oauthClientId: account.oauthClientId,
+				oauthClientSource: account.oauthClientSource,
+			};
 	}
 }
 
@@ -200,7 +248,9 @@ function secretsOf(account: Account): Record<string, string> | null {
 		case "service-account":
 			return { privateKey: account.privateKey };
 		case "google-user":
-			return { refreshToken: account.refreshToken, clientSecret: account.oauthClient.clientSecret };
+			return account.oauthClientSource === "user" && account.oauthClientSecret !== null
+				? { refreshToken: account.refreshToken, clientSecret: account.oauthClientSecret }
+				: { refreshToken: account.refreshToken };
 	}
 }
 
@@ -230,7 +280,8 @@ function parseStoredAccount(value: unknown): StoredAccount {
 		return { id, type: "service-account", projectId: value.projectId, clientEmail: value.clientEmail };
 	}
 	if (value.type === "google-user" && isNonEmptyString(value.email) && isNonEmptyString(value.oauthClientId)) {
-		return { id, type: "google-user", email: value.email, oauthClientId: value.oauthClientId };
+		const oauthClientSource = value.oauthClientSource === "built-in" ? "built-in" : "user";
+		return { id, type: "google-user", email: value.email, oauthClientId: value.oauthClientId, oauthClientSource };
 	}
 	throw new Error(`The accounts file holds an invalid account ${id}.`);
 }

@@ -48,14 +48,16 @@ Click **+** in the sidebar (or **Add account** on the start page) and pick a met
 
 - **Emulator**: enter the host and port (default `127.0.0.1:8080`) and each project id you use, e.g. `demo-cinder`. The emulator cannot list its projects.
 - **Service account**: choose the service account's JSON key file. Cinder opens the key's `project_id` with the roles the service account has.
-- **Google account**: Cinder signs in through an OAuth client of your own Google Cloud project, saved once:
+- **Google account**: when the build has a built-in OAuth client (see [Bundling a Google OAuth client](#bundling-a-google-oauth-client)), click **Sign in with Google**. Cinder opens the browser, listens on a random `127.0.0.1` port for Google's answer, and stops waiting after 5 minutes. **Use your own OAuth client** below it switches to a client of your own Google Cloud project (steps below); **Use built-in client** switches back. A build without a built-in client always asks for your own client, saved once:
   1. In the [Google Cloud console](https://console.cloud.google.com/apis/credentials), open **APIs & Services → Credentials → Create credentials → OAuth client ID** and choose the application type **Desktop app**. Configure the OAuth consent screen first if the console asks; while it is in testing, add your Google account as a test user.
   2. In the same project, enable the **Cloud Firestore API** and the **Firebase Management API**.
   3. Paste the client ID and client secret into Cinder and click **Sign in with Google**. Cinder opens the browser, listens on a random `127.0.0.1` port for Google's answer, and stops waiting after 5 minutes.
 
   The sidebar then lists the Firebase projects the Google account can see.
 
-Accounts are stored in `~/Library/Application Support/app.cinder.desktop/<channel>/accounts.json` (mode `0600`, no secrets). Private keys, refresh tokens, and the OAuth client secret are stored in the macOS keychain under the service `app.cinder.desktop/<channel>`. Removing an account deletes its keychain item.
+Accounts are stored in `~/Library/Application Support/app.cinder.desktop/<channel>/accounts.json` (mode `0600`, no secrets). Private keys, refresh tokens, and the secret of your own OAuth client are stored in the macOS keychain under the service `app.cinder.desktop/<channel>`. Removing an account deletes its keychain item.
+
+A Google account keeps the OAuth client that signed it in, because Google refreshes a token only with that client. An account signed in with the built-in client of one build shows "Sign in again" in a build without that client (another client id, or none); signing in again with the same Google account replaces it.
 
 ## Browse data
 
@@ -140,7 +142,7 @@ bun run typecheck
 bun run test
 ```
 
-`typecheck` checks the main process, the scripts and the tests with `tsc` and the Angular app, templates included, with `ngc`. Tests use `bun:test` and live in `tests/`, mirroring `src/`. The worker, task queue, browse session, and account storage tests run against the Firestore emulator, so start it first with `bun run emulator`; each test writes under its own collection in `demo-cinder` (the copy tests also in `demo-cinder-copy`) and deletes it afterwards. The emulator never forgets a collection path, even after its documents are deleted, and `listCollections` slows down with their number, so restart it after very large test runs. Export and import tests write files in a folder they create in the system temp directory (`TMPDIR`) and delete it. The account storage tests also write keychain items under a random `app.cinder.desktop.test-…` service and delete them afterwards. The Google sign-in and project listing tests use local fake servers and never reach Google.
+`typecheck` checks the main process, the scripts and the tests with `tsc` and the Angular app, templates included, with `ngc`. Tests use `bun:test` and live in `tests/`, mirroring `src/`. The worker, task queue, browse session, and account storage tests run against the Firestore emulator, so start it first with `bun run emulator`; each test writes under its own collection in `demo-cinder` (the copy tests also in `demo-cinder-copy`) and deletes it afterwards. The emulator never forgets a collection path, even after its documents are deleted, and `listCollections` slows down with their number, so restart it after very large test runs. Export and import tests, and the built-in OAuth client file tests, write files in a folder they create in the system temp directory (`TMPDIR`) and delete it; no test reads `google-oauth-client.local.json`. The account storage tests also write keychain items under a random `app.cinder.desktop.test-…` service and delete them afterwards. The Google sign-in and project listing tests use local fake servers and never reach Google.
 
 ## Build and package
 
@@ -149,6 +151,21 @@ bun run build
 ```
 
 The stable build goes to `build/stable-macos-arm64/Cinder.app` (about 22 MB; the app unpacks its compressed payload on first launch) and the distributable `.dmg` (about 22 MB) and update bundle to `artifacts/`. The packaged app needs nothing installed: it carries its own Bun runtime, and the Firestore worker is a self-contained bundle (`docs/electrobun-config.md`).
+
+### Bundling a Google OAuth client
+
+A build can carry one Google OAuth client, so users sign in with Google without creating their own. Without it the build is unchanged and every user enters their own client.
+
+1. In the [Google Cloud console](https://console.cloud.google.com/), pick or create the project that will own the client. Its quota and billing cover every user's Firebase and Firestore API calls.
+2. Enable the **Cloud Firestore API** and the **Firebase Management API** (APIs & Services → Library).
+3. Configure the OAuth consent screen (Google Auth Platform → Branding, Audience, Data access): app name, support email, user type **External**, and the scopes Cinder asks for: `openid`, `email` and `https://www.googleapis.com/auth/cloud-platform`.
+   - **Testing** (the start): only the test users you add (at most 100) can sign in, they see a "Google hasn't verified this app" screen they must click through, and their refresh tokens expire after 7 days, so they have to sign in again weekly.
+   - **In production**: anyone can sign in, but until Google verifies the app (needed for the sensitive `cloud-platform` scope) users see the unverified-app warning and the app is limited to 100 users. Verification asks for a privacy policy, a homepage and a scope justification.
+4. Create the client: APIs & Services → Credentials → **Create credentials → OAuth client ID**, application type **Desktop app**. No redirect URI is needed; Desktop app clients accept any `127.0.0.1` port.
+5. Copy `google-oauth-client.example.json` to `google-oauth-client.local.json` and fill in the client ID and client secret.
+6. Rebuild with `bun run build` (or restart `bun run dev`). The build stops with the reason if the file is not valid JSON, the client ID does not end with `.apps.googleusercontent.com`, or the secret is empty.
+
+The client secret ships in plain text inside the app bundle (`Resources/app/bun/index.js`); it never reaches the webview. Google treats the secret of a Desktop app client as not confidential, and Cinder signs in with PKCE and a loopback redirect, so the secret alone cannot sign anyone in. `google-oauth-client.local.json` is git-ignored: keep it out of git, and rotate the secret in the console if it is ever committed. Use your own client, never another app's.
 
 ### App icon
 
@@ -168,5 +185,5 @@ The build is unsigned, so macOS Gatekeeper warns on other Macs (right-click → 
 - `src/worker/`: the worker process: one per running task (`tasks/`: run-script, export, import, analyze-csv, load-csv, bulk-update, copy, delete-collection), or a browse session per database with `--browse-session`; `utils/` holds the value encoder and decoder, query building, paging and counting, the recursive collection reader, the bulk document writer, file and CSV reading.
 - `src/shared/interfaces/`: contracts shared by the main process, worker, and webview: RPC schema, tasks, export, import, CSV, bulk update, copy and delete contracts, browse operations, accounts, projects, and encoded Firestore values. `src/shared/constants/` holds the account input rules, page sizes, Firestore value limits and export/import options both sides check; `src/shared/utils/` the path, value and query parsing and validation both sides use, the query script generator and parser, the Cinder JSON format, CSV value rules, the readable/plain JSON mapping, export file name rules, and the bulk update and copy validation.
 - `src/mainview/`: Angular webview: `features/connections`, `features/explorer`, `features/query`, `features/transfer` (export, import and copy pages), `features/bulk-edit` (bulk update and delete pages) and `features/tasks`; `core/stores/tasks.store.ts` keeps every task of the session; components several features render (document views, value cells, the code editor) live in `app/shared/components/`. Global design tokens live in `src/mainview/styles/`.
-- `scripts/generate-icon.ts`: draws the app icon into `icon.iconset/`.
-- `electrobun.config.ts`: app identity, icon and build inputs. `hutch.config.ts`: Electrobun version pin and package manager.
+- `scripts/generate-icon.ts`: draws the app icon into `icon.iconset/`. `scripts/built-in-oauth-client.ts`: reads and checks `google-oauth-client.local.json` for the build.
+- `electrobun.config.ts`: app identity, icon, build inputs and the built-in OAuth client. `hutch.config.ts`: Electrobun version pin and package manager.
