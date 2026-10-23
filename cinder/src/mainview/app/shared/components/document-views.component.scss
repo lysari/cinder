@@ -1,0 +1,50 @@
+:host {
+	display: block;
+}
+
+.document-tree {
+	padding: var(--space-4) var(--space-5);
+	list-style: none;
+
+	.document-branch {
+		&[open] > .document-row .disclosure {
+			transform: rotate(90deg);
+		}
+
+		.document-row {
+			display: flex;
+			align-items: center;
+			gap: var(--space-4);
+			height: var(--control-height);
+			padding: 0 var(--space-3);
+			border-radius: var(--radius-sm);
+			list-style: none;
+			cursor: pointer;
+
+			&::-webkit-details-marker {
+				display: none;
+			}
+
+			lucide-icon {
+				--icon-size: var(--icon-size-sm);
+
+				color: var(--text-secondary);
+			}
+
+			.disclosure {
+				color: var(--text-muted);
+				transition: transform var(--transition-fast);
+			}
+
+			.document-id {
+				font-family: var(--font-mono);
+				font-weight: var(--font-weight-medium);
+				user-select: text;
+			}
+
+			&:hover {
+				background: var(--bg-hover);
+			}
+		}
+	}
+}

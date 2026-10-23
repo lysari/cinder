@@ -5,6 +5,7 @@ import type { DatabaseTarget } from "../../../../../shared/interfaces/account.in
 import { AccountsStore } from "../../../core/stores/accounts.store";
 import { CollectionsStore } from "../../../core/stores/collections.store";
 import { collectionRoute } from "../../../shared/utils/explorer-route";
+import { importRoute } from "../../../shared/utils/transfer-route";
 import { EmptyStateComponent } from "../components/empty-state.component";
 import { ExplorerBreadcrumbComponent } from "../components/explorer-breadcrumb.component";
 
@@ -27,6 +28,7 @@ export class ExplorerDatabasePage {
 	}));
 	protected readonly accountLabel = computed(() => this.accounts.labelOf(this.accountId()));
 	protected readonly rootCollections = computed(() => this.collections.rootCollectionsOf(this.database()));
+	protected readonly importLink = computed(() => importRoute(this.database(), null));
 
 	constructor() {
 		effect(() => {

@@ -2,10 +2,10 @@ import { Component, computed, inject, input } from "@angular/core";
 import { Router, RouterLink } from "@angular/router";
 import type { DatabaseTarget } from "../../../../../shared/interfaces/account.interface";
 import { AccountsStore } from "../../../core/stores/accounts.store";
+import { ValueEditorComponent } from "../../../shared/components/value-editor.component";
 import type { ValueDraft } from "../../../shared/interfaces/value-draft.interface";
 import { collectionRoute, documentRoute } from "../../../shared/utils/explorer-route";
 import { ExplorerBreadcrumbComponent } from "../components/explorer-breadcrumb.component";
-import { ValueEditorComponent } from "../components/value-editor.component";
 import { AddDocumentStore } from "../stores/add-document.store";
 
 @Component({

@@ -1,0 +1,123 @@
+:host {
+	--query-page-editor-height: 40%;
+	--query-page-builder-max-height: 45%;
+	--query-page-console-height: 160px;
+
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.page-header {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	gap: var(--space-5);
+	height: var(--pane-header-height);
+	padding: 0 var(--space-5);
+	border-bottom: var(--border-width) solid var(--border);
+
+	.page-title {
+		font-size: var(--font-size-md);
+		font-weight: var(--font-weight-semibold);
+	}
+
+	.database-label {
+		min-width: 0;
+		overflow: hidden;
+		color: var(--text-secondary);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-shrink: 0;
+	gap: var(--space-5);
+	height: var(--toolbar-height);
+	padding: 0 var(--space-5);
+	border-bottom: var(--border-width) solid var(--border);
+
+	.toolbar-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-5);
+
+		.run-status {
+			display: inline-flex;
+			align-items: baseline;
+			gap: var(--space-4);
+			color: var(--text-secondary);
+			font-size: var(--font-size-sm);
+
+			.status-label {
+				font-weight: var(--font-weight-semibold);
+			}
+
+			&.is-queued .status-label,
+			&.is-running .status-label {
+				color: var(--accent-strong);
+			}
+
+			&.is-done .status-label {
+				color: var(--text-success);
+			}
+
+			&.is-failed .status-label {
+				color: var(--text-danger);
+			}
+
+			&.is-canceled .status-label {
+				color: var(--text-muted);
+			}
+		}
+
+		.button-primary,
+		.button-secondary {
+			height: var(--control-height);
+		}
+	}
+}
+
+.switch-error {
+	flex-shrink: 0;
+	margin: var(--space-4) var(--space-5) 0;
+}
+
+.editor-pane {
+	flex-shrink: 0;
+	min-height: 0;
+	border-bottom: var(--border-width) solid var(--border);
+
+	&.is-builder {
+		max-height: var(--query-page-builder-max-height);
+		overflow-y: auto;
+	}
+
+	&.is-script {
+		height: var(--query-page-editor-height);
+
+		.editor-loading {
+			padding: var(--space-5);
+			color: var(--text-muted);
+		}
+	}
+}
+
+.results-pane {
+	flex: 1;
+	min-height: 0;
+
+	.results-placeholder {
+		padding: var(--space-6) var(--space-5);
+		color: var(--text-muted);
+	}
+}
+
+.console-pane {
+	flex-shrink: 0;
+	height: var(--query-page-console-height);
+}

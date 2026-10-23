@@ -28,7 +28,7 @@ cinder/
 │       └── app/
 │           ├── core/                   # RPC client service, app-wide signal stores
 │           ├── features/
-│           │   └── <feature>/          # connections, explorer, query, tasks
+│           │   └── <feature>/          # connections, explorer, query, transfer, tasks
 │           │       ├── components/
 │           │       ├── pages/
 │           │       ├── services/
@@ -38,7 +38,9 @@ cinder/
 │           ├── app.component.ts        # Mounts the router only
 │           ├── app.config.ts
 │           └── app.routes.ts
-├── tests/                              # bun:test suites mirroring src/
+├── scripts/                            # Build-time scripts (generate-icon.ts draws icon.iconset/)
+├── icon.iconset/                       # Generated macOS app icon, all sizes
+├── tests/                              # bun:test suites mirroring src/ and scripts/
 └── docs/                               # Per-page and per-file docs, git-ignored
 ```
 

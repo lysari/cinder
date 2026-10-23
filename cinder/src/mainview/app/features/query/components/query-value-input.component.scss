@@ -1,0 +1,26 @@
+:host {
+	--query-value-input-type-width: 112px;
+
+	display: flex;
+	flex: 1;
+	gap: var(--space-4);
+	min-width: 0;
+}
+
+.type-select {
+	flex-shrink: 0;
+	width: var(--query-value-input-type-width);
+}
+
+.value-input {
+	flex: 1;
+	min-width: 0;
+}
+
+.null-value {
+	display: inline-flex;
+	align-items: center;
+	color: var(--value-null);
+	font-family: var(--font-mono);
+	font-style: italic;
+}

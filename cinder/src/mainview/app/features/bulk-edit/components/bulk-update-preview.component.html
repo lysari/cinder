@@ -1,0 +1,54 @@
+<div class="preview-scroll">
+	<table class="preview-table">
+		<thead>
+			<tr>
+				<th scope="col">Document</th>
+				<th scope="col">Field</th>
+				<th scope="col">Before</th>
+				<th scope="col">After</th>
+			</tr>
+		</thead>
+		@for (document of documents(); track document.path) {
+			<tbody>
+				@if (document.problem; as problem) {
+					<tr>
+						<th scope="row" class="document-cell"><code>{{ document.path }}</code></th>
+						<td colspan="3" class="is-problem">Not updated: {{ problem }}</td>
+					</tr>
+				} @else {
+					@for (change of document.changes; track change.fieldPath; let first = $first) {
+						<tr>
+							@if (first) {
+								<th scope="row" class="document-cell" [attr.rowspan]="document.changes.length">
+									<code>{{ document.path }}</code>
+								</th>
+							}
+							<td><code>{{ change.fieldPath }}</code></td>
+							<td>
+								@if (change.before; as before) {
+									<app-value-cell [value]="before" [database]="database()" />
+								} @else {
+									<span class="is-muted">missing</span>
+								}
+							</td>
+							<td>
+								@if (change.isServerTimestamp) {
+									<span class="is-note">server time</span>
+								} @else if (change.after) {
+									<app-value-cell [value]="change.after" [database]="database()" />
+								} @else {
+									<span class="is-muted">removed</span>
+								}
+							</td>
+						</tr>
+					} @empty {
+						<tr>
+							<th scope="row" class="document-cell"><code>{{ document.path }}</code></th>
+							<td colspan="3" class="is-muted">No change</td>
+						</tr>
+					}
+				}
+			</tbody>
+		}
+	</table>
+</div>

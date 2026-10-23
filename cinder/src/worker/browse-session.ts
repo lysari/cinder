@@ -14,20 +14,35 @@ import type {
 	UpdateDocumentParams,
 } from "../shared/interfaces/browse.interface";
 import type { FirestoreDocument, FirestoreValue } from "../shared/interfaces/firestore-value.interface";
+import type { LiveQueryParams, LiveUpdate } from "../shared/interfaces/live.interface";
+import type { RunQueryParams } from "../shared/interfaces/query.interface";
 import { isObject } from "../shared/utils/type-guards";
 import { createFirestore } from "./firestore-client";
+import { buildQuery, countDocuments } from "./utils/firestore-query";
 import { decodeFields, decodeValue } from "./utils/firestore-value-decoder";
 import { encodeBigIntDocument } from "./utils/firestore-value-encoder";
 
 const GRPC_NOT_FOUND = 5;
 const GRPC_ALREADY_EXISTS = 6;
+const CLOSE_TIMEOUT_MS = 2_000;
+const unsubscribers = new Map<string, () => void>();
 
 export function startBrowseSession(): void {
 	process.on("unhandledRejection", (reason) => console.error(`Browse session error: ${describeError(reason)}`));
 	process.once("message", (message) => {
 		const db = createFirestore((message as BrowseSessionStartMessage).settings, { useBigInt: true });
 		process.on("message", (request) => void answer(db, request as BrowseRequestMessage));
+		process.once("SIGTERM", () => close(db));
 	});
+}
+
+function close(db: Firestore): void {
+	setTimeout(() => process.exit(1), CLOSE_TIMEOUT_MS);
+	for (const unsubscribe of unsubscribers.values()) {
+		unsubscribe();
+	}
+	unsubscribers.clear();
+	void db.terminate().then(() => process.exit(0));
 }
 
 async function answer(db: Firestore, { requestId, operation }: BrowseRequestMessage): Promise<void> {
@@ -56,6 +71,16 @@ function runOperation(db: Firestore, operation: BrowseOperation): Promise<Browse
 			return setDocument(db, db.doc(operation.params.documentPath), operation.params.fields);
 		case "deleteDocument":
 			return deleteDocument(db, operation.params);
+		case "runQuery":
+			return runQuery(db, operation.params);
+		case "countQuery":
+			return countDocuments(buildQuery(db, operation.params.query), operation.params.query.limit);
+		case "listen":
+			return listen(db, operation.params);
+		case "unlisten":
+			unsubscribers.get(operation.params.listenerId)?.();
+			unsubscribers.delete(operation.params.listenerId);
+			return Promise.resolve(null);
 	}
 }
 
@@ -123,6 +148,55 @@ async function deleteDocument(db: Firestore, { documentPath, isRecursive }: Dele
 	} else {
 		await reference.delete();
 	}
+	return null;
+}
+
+async function runQuery(db: Firestore, { query, pageSize, startAfter }: RunQueryParams): Promise<DocumentPage> {
+	const remainingCount = query.limit === null ? Number.POSITIVE_INFINITY : query.limit - (startAfter?.documentCount ?? 0);
+	if (remainingCount <= 0) {
+		return { documents: [], hasMore: false };
+	}
+	let sdkQuery = buildQuery(db, query).limit(Math.min(pageSize + 1, remainingCount));
+	if (startAfter !== null) {
+		const lastDocument = await db.doc(startAfter.documentPath).get();
+		if (!lastDocument.exists) {
+			throw new Error("The last loaded document was deleted. Run the query again.");
+		}
+		sdkQuery = sdkQuery.startAfter(lastDocument);
+	}
+	const snapshot = await sdkQuery.get();
+	return {
+		documents: snapshot.docs.slice(0, pageSize).map((document) => encodeBigIntDocument(document)),
+		hasMore: snapshot.size > pageSize,
+	};
+}
+
+async function listen(db: Firestore, { listenerId, query, limit }: LiveQueryParams): Promise<null> {
+	if (unsubscribers.has(listenerId)) {
+		throw new Error("This live view is already running.");
+	}
+	let isFirst = true;
+	const unsubscribe = buildQuery(db, query)
+		.limit(limit)
+		.onSnapshot(
+			(snapshot) => {
+				const changes = snapshot.docChanges().map((change) => ({
+					type: change.type,
+					document: encodeBigIntDocument(change.doc),
+					oldIndex: change.oldIndex,
+					newIndex: change.newIndex,
+				}));
+				if (isFirst || changes.length > 0) {
+					process.send?.({ listenerId, kind: "changes", isFirst, changes } satisfies LiveUpdate);
+					isFirst = false;
+				}
+			},
+			(error) => {
+				unsubscribers.delete(listenerId);
+				process.send?.({ listenerId, kind: "stopped", reason: describeError(error) } satisfies LiveUpdate);
+			},
+		);
+	unsubscribers.set(listenerId, unsubscribe);
 	return null;
 }
 

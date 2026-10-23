@@ -7,6 +7,7 @@ import {
 	MIN_TIMESTAMP_SECONDS,
 } from "../../../../shared/constants/firestore-limits";
 import type { FirestoreTimestamp, FirestoreValue, NonFiniteDouble } from "../../../../shared/interfaces/firestore-value.interface";
+import { formatTimestampUtc } from "../../../../shared/utils/firestore-timestamp";
 import {
 	isBase64Text,
 	isDocumentPath,
@@ -14,7 +15,7 @@ import {
 	isValidFieldName,
 } from "../../../../shared/utils/firestore-validation";
 import type { FieldChanges, FieldDraft, GeoPointDraft, ValueDraft, ValueType } from "../interfaces/value-draft.interface";
-import { formatTimestampLocal, formatTimestampUtc } from "./firestore-value-format";
+import { formatTimestampLocal } from "./firestore-value-format";
 
 const NON_FINITE_DOUBLES: NonFiniteDouble[] = ["NaN", "Infinity", "-Infinity"];
 const DECIMAL_PATTERN = /^[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?$/i;
@@ -150,19 +151,13 @@ export function hasFieldDraftError(fields: FieldDraft[]): boolean {
 	return fields.some((field) => fieldNameError(fields, field) !== null || hasDraftError(field.value));
 }
 
-/** Returns a note to show under a valid input: a timestamp's local time, or that a whole-number double is saved as an integer. */
+/** Returns a note to show under a valid input: a timestamp's local time. */
 export function valueHint(draft: ValueDraft): string | null {
-	if (draft.type === "timestamp") {
-		const timestamp = parseTimestampText(draft.text);
-		return timestamp ? `Local time ${formatTimestampLocal(timestamp)}` : null;
+	if (draft.type !== "timestamp") {
+		return null;
 	}
-	if (draft.type === "double") {
-		const value = parseDouble(draft.text);
-		return typeof value === "number" && Number.isInteger(value)
-			? "Firestore saves a whole number written from Cinder as an integer."
-			: null;
-	}
-	return null;
+	const timestamp = parseTimestampText(draft.text);
+	return timestamp ? `Local time ${formatTimestampLocal(timestamp)}` : null;
 }
 
 /** Reads the tagged value of a draft without errors (check `hasDraftError` first); digits of any script are read as numbers. */

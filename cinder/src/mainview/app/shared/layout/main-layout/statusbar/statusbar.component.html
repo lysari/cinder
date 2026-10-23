@@ -3,4 +3,18 @@
 } @else {
 	<span>No account selected</span>
 }
-<span>No tasks running</span>
+<a class="task-indicator" routerLink="/tasks" title="Show tasks" role="status">
+	@if (firstActiveTask(); as task) {
+		<lucide-icon name="activity" />
+		<span class="task-label">
+			{{ tasksStore.activeTasks().length }} {{ tasksStore.activeTasks().length === 1 ? "task" : "tasks" }} running: {{ task.description }}
+		</span>
+		@if (firstTaskRatio() !== null) {
+			<progress class="task-progress" [value]="firstTaskRatio()" max="1"></progress>
+		} @else {
+			<progress class="task-progress"></progress>
+		}
+	} @else {
+		<span class="task-label">No tasks running</span>
+	}
+</a>

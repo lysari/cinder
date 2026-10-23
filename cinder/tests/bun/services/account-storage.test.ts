@@ -140,6 +140,7 @@ describe("AccountStorage", () => {
 			concurrency: 1,
 			findAccount: (accountId) => reloaded.find(accountId),
 			onUpdate: (update) => updates.push(update),
+			cleanUp: async () => {},
 		});
 		const taskId = queue.start({
 			type: "run-script",

@@ -4,8 +4,12 @@ import { LucideAngularModule } from "lucide-angular";
 import type { AccountSummary, DatabaseTarget } from "../../../../../../shared/interfaces/account.interface";
 import { AccountsStore } from "../../../../core/stores/accounts.store";
 import { CollectionsStore } from "../../../../core/stores/collections.store";
+import { bulkUpdateCollectionRoute, deleteCollectionRoute } from "../../../utils/bulk-edit-route";
 import { errorMessage } from "../../../utils/error-message";
 import { collectionRoute, databaseRoute } from "../../../utils/explorer-route";
+import { queryRoute } from "../../../utils/query-route";
+import { type CopyOperation, copyRoute } from "../../../utils/transfer-route";
+import { SidebarStore } from "../sidebar.store";
 
 const ACCOUNT_ICONS: Record<AccountSummary["type"], string> = {
 	emulator: "server",
@@ -21,52 +25,17 @@ const ACCOUNT_ICONS: Record<AccountSummary["type"], string> = {
 })
 export class SidebarComponent {
 	private readonly router = inject(Router);
-	private readonly expandedIds = signal<ReadonlySet<string>>(new Set());
 	protected readonly store = inject(AccountsStore);
+	protected readonly tree = inject(SidebarStore);
 	protected readonly collections = inject(CollectionsStore);
 	protected readonly accountIcons = ACCOUNT_ICONS;
 	protected readonly removalAccountId = signal<string | null>(null);
 	protected readonly isRemoving = signal(false);
+	protected readonly openMenuKey = signal<string | null>(null);
 	protected readonly removalError = signal<string | null>(null);
 
 	constructor() {
-		void this.store.loadAccounts();
-	}
-
-	protected isExpanded(accountId: string): boolean {
-		return this.expandedIds().has(accountId);
-	}
-
-	protected isProjectExpanded(accountId: string, projectId: string): boolean {
-		return this.expandedIds().has(projectKey(accountId, projectId));
-	}
-
-	protected toggleAccount(accountId: string): void {
-		if (this.toggle(accountId)) {
-			void this.store.loadProjects(accountId);
-		}
-	}
-
-	protected toggleProject(accountId: string, projectId: string): void {
-		if (this.toggle(projectKey(accountId, projectId))) {
-			void this.store.loadDatabases(accountId, projectId);
-		}
-	}
-
-	protected isDatabaseExpanded(database: DatabaseTarget): boolean {
-		return this.expandedIds().has(databaseKey(database));
-	}
-
-	protected toggleDatabase(database: DatabaseTarget): void {
-		if (this.toggle(databaseKey(database))) {
-			void this.collections.loadRootCollections(database);
-		}
-	}
-
-	protected expandDatabase(database: DatabaseTarget): void {
-		if (!this.isDatabaseExpanded(database)) {
-			this.toggleDatabase(database);
-		}
+		void this.tree.loadExpanded();
 	}
 
 	protected databaseLink(database: DatabaseTarget): string[] {
@@ -75,6 +44,41 @@ export class SidebarComponent {
 
 	protected collectionLink(database: DatabaseTarget, collectionId: string): string[] {
 		return collectionRoute(database, collectionId);
+	}
+
+	protected queryLink(database: DatabaseTarget): string[] {
+		return queryRoute(database, null);
+	}
+
+	protected bulkUpdateLink(database: DatabaseTarget, collectionId: string): string[] {
+		return bulkUpdateCollectionRoute(database, collectionId);
+	}
+
+	protected copyLink(database: DatabaseTarget, collectionId: string, operation: CopyOperation): string[] {
+		return copyRoute(database, { type: "collection", collectionPath: collectionId }, operation);
+	}
+
+	protected deleteLink(database: DatabaseTarget, collectionId: string): string[] {
+		return deleteCollectionRoute(database, collectionId);
+	}
+
+	protected isCollectionMenuOpen(database: DatabaseTarget, collectionId: string): boolean {
+		return this.openMenuKey() === collectionKey(database, collectionId);
+	}
+
+	protected toggleCollectionMenu(database: DatabaseTarget, collectionId: string): void {
+		const key = collectionKey(database, collectionId);
+		this.openMenuKey.set(this.openMenuKey() === key ? null : key);
+	}
+
+	protected closeCollectionMenu(): void {
+		this.openMenuKey.set(null);
+	}
+
+	protected closeCollectionMenuOnBlur(event: FocusEvent): void {
+		if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) {
+			this.closeCollectionMenu();
+		}
 	}
 
 	protected askToRemove(accountId: string): void {
@@ -99,22 +103,8 @@ export class SidebarComponent {
 			this.isRemoving.set(false);
 		}
 	}
-
-	private toggle(id: string): boolean {
-		const expandedIds = new Set(this.expandedIds());
-		const isExpanding = !expandedIds.delete(id);
-		if (isExpanding) {
-			expandedIds.add(id);
-		}
-		this.expandedIds.set(expandedIds);
-		return isExpanding;
-	}
 }
 
-function projectKey(accountId: string, projectId: string): string {
-	return `${accountId}/${projectId}`;
-}
-
-function databaseKey({ accountId, projectId, databaseId }: DatabaseTarget): string {
-	return JSON.stringify([accountId, projectId, databaseId]);
+function collectionKey({ accountId, projectId, databaseId }: DatabaseTarget, collectionId: string): string {
+	return JSON.stringify([accountId, projectId, databaseId, collectionId]);
 }

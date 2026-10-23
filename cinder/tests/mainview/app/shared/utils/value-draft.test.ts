@@ -74,11 +74,10 @@ describe("drafts", () => {
 		expect(hasDraftError(draft)).toBe(true);
 	});
 
-	test("hint at the local time of a timestamp and at whole-number doubles", () => {
+	test("hint at the local time of a timestamp only", () => {
 		process.env.TZ = "Asia/Phnom_Penh";
 		expect(valueHint({ type: "timestamp", text: "2026-10-22T02:00:00Z" })).toBe("Local time 2026-10-22 09:00:00");
-		expect(valueHint({ type: "double", text: "2" })).toBe("Firestore saves a whole number written from Cinder as an integer.");
-		expect(valueHint({ type: "double", text: "2.5" })).toBeNull();
+		expect(valueHint({ type: "double", text: "2" })).toBeNull();
 	});
 
 	test("keep text when switching between text types and start fresh otherwise", () => {

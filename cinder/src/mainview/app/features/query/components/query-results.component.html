@@ -1,0 +1,83 @@
+@let current = run();
+@switch (current.status) {
+	@case ("failed") {
+		<div class="run-error" role="alert">
+			<p class="error-heading">
+				@if (errorLocation(); as location) {
+					Error on line {{ location.line }}{{ location.column === null ? "" : ", column " + location.column }}
+				} @else {
+					The query failed
+				}
+			</p>
+			<pre class="error-text">{{ current.error }}</pre>
+		</div>
+	}
+	@case ("canceled") {
+		<p class="results-status">The run was canceled.</p>
+	}
+	@case ("done") {
+		@let documentList = documents();
+		@let missingPath = missingDocumentPath();
+		@let resultValue = value();
+		@if (documentList) {
+			<div class="results-toolbar">
+				<app-view-switcher [(view)]="view" />
+				@if (current.mode === "builder") {
+					<button
+						type="button"
+						class="live-toggle"
+						[class.is-live]="liveStatus() !== 'off'"
+						[attr.aria-pressed]="liveStatus() !== 'off'"
+						[disabled]="!canGoLive()"
+						title="Follow changes to these results as they happen"
+						(click)="liveToggled.emit()"
+					>
+						<span class="live-dot" aria-hidden="true"></span>
+						Live
+					</button>
+				}
+			</div>
+			@if (liveError(); as message) {
+				<p class="form-error live-error" role="alert">Live stopped: {{ message }}</p>
+			}
+			<div class="results-body">
+				@if (documentList.length === 0) {
+					<p class="results-status">No documents match.</p>
+				} @else {
+					<app-document-views [documents]="documentList" [database]="database()" [view]="view()" [changedPaths]="changedPaths()" />
+				}
+			</div>
+			@if (current.mode === "builder" && current.hasMore && liveStatus() === "off") {
+				<footer class="results-footer">
+					@if (current.loadMoreError; as message) {
+						<span class="footer-error" role="alert">{{ message }}</span>
+					}
+					<button type="button" class="button-secondary" [disabled]="current.isLoadingMore" (click)="loadMoreRequested.emit()">
+						{{ current.isLoadingMore ? "Loading…" : "Load more" }}
+					</button>
+				</footer>
+			}
+		} @else if (missingPath !== null) {
+			<p class="results-status">No document exists at {{ missingPath }}.</p>
+		} @else if (resultValue) {
+			<div class="results-toolbar">
+				<app-view-switcher [(view)]="view" [hasTable]="false" />
+			</div>
+			<div class="results-body">
+				@if (valueView() === "json") {
+					<pre class="json-view">{{ valueJson() }}</pre>
+				} @else if (resultValue.type === "map" || resultValue.type === "array") {
+					<app-value-tree class="result-tree" [value]="resultValue" [database]="database()" />
+				} @else {
+					<div class="value-row">
+						<span class="type-label">{{ resultValue.type }}</span>
+						<app-value-cell [value]="resultValue" [database]="database()" />
+					</div>
+				}
+			</div>
+		}
+	}
+	@default {
+		<p class="results-status">{{ current.status === "queued" ? "Waiting to start…" : "Running…" }}</p>
+	}
+}

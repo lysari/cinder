@@ -1,0 +1,32 @@
+@switch (view()) {
+	@case ("table") {
+		<app-collection-table
+			[documents]="documents()"
+			[fieldNames]="fieldNames()"
+			[database]="database()"
+			[changedPaths]="changedPaths()"
+			(documentSelected)="openDocument($event)"
+		/>
+	}
+	@case ("tree") {
+		<ul class="document-tree">
+			@for (document of documents(); track document.path) {
+				<li>
+					<details class="document-branch">
+						<summary class="document-row" [class.live-changed]="changedPaths().has(document.path)">
+							<lucide-icon class="disclosure" name="chevron-right" />
+							<lucide-icon name="file-text" />
+							<span class="document-id" [title]="document.path">{{ document.id }}</span>
+							@let fields = fieldsOf(document);
+							<app-value-cell [value]="fields" [database]="database()" />
+						</summary>
+						<app-value-tree [value]="fields" [database]="database()" />
+					</details>
+				</li>
+			}
+		</ul>
+	}
+	@case ("json") {
+		<pre class="json-view">{{ json() }}</pre>
+	}
+}

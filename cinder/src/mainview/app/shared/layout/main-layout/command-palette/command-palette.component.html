@@ -1,0 +1,50 @@
+<dialog #dialog class="palette" aria-label="Command palette" (cancel)="$event.preventDefault(); close()" (click)="$event.target === dialog && close()">
+	<div class="palette-body">
+		<div class="search-row">
+			<lucide-icon name="search" />
+			<input
+				#input
+				class="search-input"
+				type="text"
+				role="combobox"
+				aria-label="Search accounts, databases, collections, tabs and actions"
+				aria-autocomplete="list"
+				aria-controls="command-palette-options"
+				[attr.aria-expanded]="options().length > 0"
+				[attr.aria-activedescendant]="activeOptionId()"
+				placeholder="Go to a database or collection, switch tabs, run an action…"
+				autocomplete="off"
+				spellcheck="false"
+				[value]="query()"
+				(input)="search(input.value)"
+				(keydown)="handleKey($event)"
+			/>
+		</div>
+		<div id="command-palette-options" class="options" role="listbox" aria-label="Results">
+			@for (group of groups(); track group.name) {
+				<div class="group" role="group" [attr.aria-labelledby]="'command-palette-group-' + group.name">
+					<div class="group-heading" role="presentation" [id]="'command-palette-group-' + group.name">{{ group.name }}</div>
+					@for (item of group.items; track item.id) {
+						@let index = indexOf(item);
+						<div
+							class="option"
+							role="option"
+							[id]="optionId(index)"
+							[class.is-active]="index === activeIndex()"
+							[attr.aria-selected]="index === activeIndex()"
+							(mousedown)="$event.preventDefault()"
+							(mousemove)="activeIndex.set(index)"
+							(click)="choose(item)"
+						>
+							<span class="option-label">{{ item.label }}</span>
+							<span class="option-detail">{{ item.detail }}</span>
+						</div>
+					}
+				</div>
+			} @empty {
+				<p class="no-results">Nothing matches “{{ query() }}”.</p>
+			}
+		</div>
+		<p class="hint">↑ ↓ to move · ↵ to choose · esc to close</p>
+	</div>
+</dialog>

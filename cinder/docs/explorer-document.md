@@ -5,7 +5,7 @@ Route: `#/explorer/:accountId/:projectId/:databaseId/d/:documentPath` (see `expl
 ## Layout
 
 - Header: breadcrumb of the document path.
-- Toolbar: copy path (`navigator.clipboard`, which works in the Electrobun webview), refresh (discards unsaved edits), then Revert, Save and delete.
+- Toolbar: copy path (`navigator.clipboard`, which works in the Electrobun webview), refresh (discards unsaved edits), export this document (`export.md`), duplicate and copy or move (`copy.md`), then Revert, Save and delete.
 - Body: path, created and updated time (local, UTC in the tooltip), subcollections as links, and the field editor.
 
 ## Loading

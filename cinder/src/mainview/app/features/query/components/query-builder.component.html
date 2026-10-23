@@ -1,0 +1,103 @@
+<form class="builder" [formGroup]="form" (submit)="$event.preventDefault()">
+	<section class="builder-section">
+		<h2 class="section-label" id="query-target-label">Collection</h2>
+		<div class="builder-row" role="group" aria-labelledby="query-target-label">
+			<select class="text-input target-type-select" formControlName="targetType" aria-label="Query target">
+				<option value="collection">Collection</option>
+				<option value="collection-group">Collection group</option>
+			</select>
+			@if (form.controls.targetType.value === "collection") {
+				<input class="text-input path-input" formControlName="targetPath" aria-label="Collection path" placeholder="users or users/dara/orders" autocomplete="off" spellcheck="false" />
+			} @else {
+				<input class="text-input path-input" formControlName="targetPath" aria-label="Collection id" placeholder="orders" autocomplete="off" spellcheck="false" />
+			}
+		</div>
+		@for (issue of issuesOf("target", null); track $index) {
+			<p class="field-error">{{ issue.message }}</p>
+		}
+	</section>
+
+	<section class="builder-section" formArrayName="filters">
+		<h2 class="section-label">Filters</h2>
+		@for (filter of form.controls.filters.controls; track filter; let index = $index) {
+			<div class="builder-row" [formGroupName]="index">
+				<input class="text-input field-input" formControlName="fieldPath" [attr.aria-label]="'Filter ' + (index + 1) + ' field path'" placeholder="field.path" autocomplete="off" spellcheck="false" />
+				<select class="text-input operator-select" formControlName="operator" [attr.aria-label]="'Filter ' + (index + 1) + ' operator'" (change)="startListWithValue(filter, $event)">
+					<option value="==">==</option>
+					<option value="!=">!=</option>
+					<option value="<">&lt;</option>
+					<option value="<=">&lt;=</option>
+					<option value=">">&gt;</option>
+					<option value=">=">&gt;=</option>
+					<option value="array-contains">array-contains</option>
+					<option value="array-contains-any">array-contains-any</option>
+					<option value="in">in</option>
+					<option value="not-in">not-in</option>
+				</select>
+				@if (isListOperator(filter.controls.operator.value)) {
+					<div class="value-list">
+						@for (item of filter.controls.items.controls; track item; let itemIndex = $index) {
+							<div class="value-list-row">
+								<app-query-value-input [group]="item" [label]="'Filter ' + (index + 1) + ' value ' + (itemIndex + 1)" />
+								<button type="button" class="icon-button" [attr.aria-label]="'Remove value ' + (itemIndex + 1)" title="Remove value" (click)="removeItem(filter, itemIndex)">
+									<lucide-icon name="x" />
+								</button>
+							</div>
+						}
+						<button type="button" class="button-secondary add-button" (click)="addItem(filter)">
+							<lucide-icon name="plus" />
+							Add value
+						</button>
+					</div>
+				} @else {
+					<app-query-value-input [group]="filter.controls.value" [label]="'Filter ' + (index + 1) + ' value'" />
+				}
+				<button type="button" class="icon-button" [attr.aria-label]="'Remove filter ' + (index + 1)" title="Remove filter" (click)="removeFilter(index)">
+					<lucide-icon name="trash-2" />
+				</button>
+			</div>
+			@for (issue of issuesOf("filter", index); track $index) {
+				<p class="field-error">{{ issue.message }}</p>
+			}
+		} @empty {
+			<p class="section-empty">No filters, so every document matches.</p>
+		}
+		<button type="button" class="button-secondary add-button" (click)="addFilter()">
+			<lucide-icon name="plus" />
+			Add filter
+		</button>
+	</section>
+
+	<section class="builder-section" formArrayName="orders">
+		<h2 class="section-label">Order by</h2>
+		@for (order of form.controls.orders.controls; track order; let index = $index) {
+			<div class="builder-row" [formGroupName]="index">
+				<input class="text-input field-input" formControlName="fieldPath" [attr.aria-label]="'Order ' + (index + 1) + ' field path'" placeholder="field.path" autocomplete="off" spellcheck="false" />
+				<select class="text-input direction-select" formControlName="direction" [attr.aria-label]="'Order ' + (index + 1) + ' direction'">
+					<option value="asc">Ascending</option>
+					<option value="desc">Descending</option>
+				</select>
+				<button type="button" class="icon-button" [attr.aria-label]="'Remove order ' + (index + 1)" title="Remove order" (click)="removeOrder(index)">
+					<lucide-icon name="trash-2" />
+				</button>
+			</div>
+			@for (issue of issuesOf("order", index); track $index) {
+				<p class="field-error">{{ issue.message }}</p>
+			}
+		} @empty {
+			<p class="section-empty">No order, so documents come by document id.</p>
+		}
+		<button type="button" class="button-secondary add-button" (click)="addOrder()">
+			<lucide-icon name="plus" />
+			Add order
+		</button>
+	</section>
+
+	<section class="builder-section">
+		<label class="section-label" for="query-limit">Limit</label>
+		<input id="query-limit" class="text-input limit-input" formControlName="limitText" inputmode="numeric" placeholder="No limit" autocomplete="off" />
+		@for (issue of issuesOf("limit", null); track $index) {
+			<p class="field-error">{{ issue.message }}</p>
+		}
+	</section>
+</form>

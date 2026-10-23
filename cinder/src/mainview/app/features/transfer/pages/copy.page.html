@@ -1,0 +1,183 @@
+<section class="transfer-page">
+	<header class="page-header">
+		<h1 class="page-title">Copy or move</h1>
+		<p class="page-text">{{ sourceLabel() }}</p>
+	</header>
+	@if (source(); as current) {
+		<form class="form" [formGroup]="form" (ngSubmit)="start()">
+			<div class="field">
+				<span class="field-label">Source</span>
+				<p class="source-summary">{{ current.type === "collection" ? "Collection" : "Document" }} <code>{{ sourcePath() }}</code></p>
+			</div>
+			<fieldset class="field">
+				<legend class="field-label">Operation</legend>
+				<label class="choice">
+					<input type="radio" formControlName="operation" value="copy" />
+					<span class="choice-text">
+						<span class="choice-title">Copy</span>
+						<span class="field-hint">Writes copies at the destination; the source stays.</span>
+					</span>
+				</label>
+				<label class="choice">
+					<input type="radio" formControlName="operation" value="move" />
+					<span class="choice-text">
+						<span class="choice-title">Move</span>
+						<span class="field-hint">Copies, then deletes each source document once its copy is written.</span>
+					</span>
+				</label>
+				@if (isOperationAllowed("duplicate")) {
+					<label class="choice">
+						<input type="radio" formControlName="operation" value="duplicate" />
+						<span class="choice-text">
+							<span class="choice-title">Duplicate</span>
+							<span class="field-hint">A copy of this document under a new id in the same collection.</span>
+						</span>
+					</label>
+				}
+				@if (isOperationAllowed("rename")) {
+					<label class="choice">
+						<input type="radio" formControlName="operation" value="rename" />
+						<span class="choice-text">
+							<span class="choice-title">Rename</span>
+							<span class="field-hint">Moves the collection to a new path in the same database.</span>
+						</span>
+					</label>
+				}
+			</fieldset>
+			@switch (selectedOperation()) {
+				@case ("duplicate") {
+					<fieldset class="field">
+						<legend class="field-label">New document id</legend>
+						<label class="choice">
+							<input type="radio" formControlName="isAutoId" [value]="true" />
+							<span class="choice-text">
+								<span class="choice-title">Generated id</span>
+								<code class="field-hint">{{ autoId }}</code>
+							</span>
+						</label>
+						<label class="choice">
+							<input type="radio" formControlName="isAutoId" [value]="false" />
+							<span class="choice-title">Use this id</span>
+						</label>
+						@if (!form.controls.isAutoId.value) {
+							<input class="text-input" formControlName="documentId" aria-label="Document id" autocomplete="off" spellcheck="false" />
+						}
+						<p class="field-hint">The copy goes into the same collection.</p>
+					</fieldset>
+				}
+				@case ("rename") {
+					<div class="field">
+						<label class="field-label" for="copy-new-path">New collection path</label>
+						<input id="copy-new-path" class="text-input" formControlName="path" autocomplete="off" spellcheck="false" />
+						<p class="field-hint">Renaming moves every document to the new path in the same database, then deletes it at the old one.</p>
+					</div>
+				}
+				@default {
+					<fieldset class="field">
+						<legend class="field-label">Destination</legend>
+						<div class="destination-grid">
+							<label class="destination-field">
+								<span class="field-hint">Account</span>
+								<select class="text-input" formControlName="accountId">
+									<option value="" disabled>Choose an account</option>
+									@let accountList = accounts.accounts();
+									@if (accountList.status === "loaded") {
+										@for (account of accountList.value; track account.id) {
+											<option [value]="account.id">{{ account.label }}</option>
+										}
+									}
+								</select>
+							</label>
+							<label class="destination-field">
+								<span class="field-hint">Project</span>
+								<select class="text-input" formControlName="projectId">
+									<option value="" disabled>{{ projects()?.status === "loading" ? "Loading…" : "Choose a project" }}</option>
+									@let projectList = projects();
+									@if (projectList && projectList.status === "loaded") {
+										@for (project of projectList.value; track project.projectId) {
+											<option [value]="project.projectId">{{ project.displayName }}</option>
+										}
+									}
+								</select>
+							</label>
+							<label class="destination-field">
+								<span class="field-hint">Database</span>
+								<select class="text-input" formControlName="databaseId">
+									<option value="" disabled>{{ databases()?.status === "loading" ? "Loading…" : "Choose a database" }}</option>
+									@let databaseList = databases();
+									@if (databaseList && databaseList.status === "loaded") {
+										@for (databaseId of databaseList.value.databaseIds; track databaseId) {
+											<option [value]="databaseId">{{ databaseId }}</option>
+										}
+									}
+								</select>
+							</label>
+						</div>
+						@if (projects()?.status === "failed" || databases()?.status === "failed") {
+							<p class="field-error">The projects or databases of this account could not be listed.</p>
+						}
+						<label class="field-label" for="copy-destination-path">
+							{{ current.type === "collection" ? "Collection path" : "Document path" }}
+						</label>
+						<input id="copy-destination-path" class="text-input" formControlName="path" autocomplete="off" spellcheck="false" />
+						<p class="field-hint">
+							{{
+								current.type === "collection"
+									? "Subcollections keep their place below the new path: with the path people, users/dara/orders goes to people/dara/orders."
+									: "Subcollections keep their place below the new document."
+							}}
+						</p>
+					</fieldset>
+				}
+			}
+			<fieldset class="field">
+				<legend class="field-label">Existing documents at the destination</legend>
+				<label class="choice">
+					<input type="radio" formControlName="writeMode" value="overwrite" />
+					<span class="choice-title">Overwrite</span>
+				</label>
+				<label class="choice">
+					<input type="radio" formControlName="writeMode" value="merge" />
+					<span class="choice-title">Merge fields</span>
+				</label>
+				<label class="choice">
+					<input type="radio" formControlName="writeMode" value="skip" />
+					<span class="choice-text">
+						<span class="choice-title">Skip</span>
+						<span class="field-hint">A skipped document of a move stays at the source.</span>
+					</span>
+				</label>
+			</fieldset>
+			<label class="choice">
+				<input type="checkbox" formControlName="isRecursive" />
+				<span class="choice-text">
+					<span class="choice-title">Include all subcollections</span>
+					<span class="field-hint">Documents that only hold subcollections and no fields are not visited, so their subcollections stay behind.</span>
+				</span>
+			</label>
+			<label class="choice">
+				<input type="checkbox" formControlName="isRewritingReferences" />
+				<span class="choice-text">
+					<span class="choice-title">Rewrite references to copied documents</span>
+					<span class="field-hint">A reference that points at a document inside the copied tree is changed to point at its copy. Off by default: references keep their path.</span>
+				</span>
+			</label>
+			@if (requestError(); as message) {
+				<p class="field-error" role="alert">{{ message }}</p>
+			} @else if (summary()) {
+				<p class="copy-summary" role="status">{{ summary() }}</p>
+			}
+			@if (store.error(); as message) {
+				<p class="form-error" role="alert">{{ message }}</p>
+			}
+			<div class="form-actions">
+				<button type="submit" class="button-primary" [disabled]="summary() === null || store.isStarting()">
+					<lucide-icon name="play" />
+					{{ store.isStarting() ? "Starting…" : "Start" }}
+				</button>
+			</div>
+		</form>
+	} @else {
+		<p class="form-error" role="alert">This link does not name a valid collection or document.</p>
+	}
+</section>

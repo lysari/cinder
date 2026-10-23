@@ -1,0 +1,95 @@
+:host {
+	--query-builder-target-width: 168px;
+	--query-builder-field-width: 200px;
+	--query-builder-operator-width: 168px;
+	--query-builder-direction-width: 136px;
+	--query-builder-limit-width: 136px;
+
+	display: block;
+}
+
+.builder {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-6);
+	padding: var(--space-5);
+
+	.builder-section {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-4);
+
+		.section-label {
+			color: var(--text-muted);
+			font-size: var(--font-size-xs);
+			font-weight: var(--font-weight-semibold);
+			letter-spacing: var(--letter-spacing-label);
+			text-transform: uppercase;
+		}
+
+		.section-empty {
+			color: var(--text-muted);
+		}
+
+		.builder-row {
+			display: flex;
+			align-items: flex-start;
+			gap: var(--space-4);
+			width: 100%;
+
+			.target-type-select {
+				flex-shrink: 0;
+				width: var(--query-builder-target-width);
+			}
+
+			.path-input {
+				flex: 1;
+				min-width: 0;
+			}
+
+			.field-input {
+				flex-shrink: 0;
+				width: var(--query-builder-field-width);
+			}
+
+			.operator-select {
+				flex-shrink: 0;
+				width: var(--query-builder-operator-width);
+			}
+
+			.direction-select {
+				flex-shrink: 0;
+				width: var(--query-builder-direction-width);
+			}
+
+			.value-list {
+				display: flex;
+				flex: 1;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: var(--space-4);
+				min-width: 0;
+
+				.value-list-row {
+					display: flex;
+					gap: var(--space-4);
+					width: 100%;
+				}
+			}
+
+			.icon-button {
+				flex-shrink: 0;
+				height: var(--control-height-lg);
+			}
+		}
+
+		.add-button {
+			height: var(--control-height);
+		}
+
+		.limit-input {
+			width: var(--query-builder-limit-width);
+		}
+	}
+}

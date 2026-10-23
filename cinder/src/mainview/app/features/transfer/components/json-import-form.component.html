@@ -1,0 +1,71 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()">
+	<fieldset class="field">
+		<legend class="field-label">Target</legend>
+		@if (isCinderFile()) {
+			<label class="choice">
+				<input type="radio" formControlName="targetType" value="original-paths" />
+				<span class="choice-text">
+					<span class="choice-title">Original paths</span>
+					<span class="field-hint">Each document goes back to the path it was exported from.</span>
+				</span>
+			</label>
+		}
+		<label class="choice">
+			<input type="radio" formControlName="targetType" value="collection" />
+			<span class="choice-text">
+				<span class="choice-title">Into a collection</span>
+				@if (isCinderFile()) {
+					<span class="field-hint">Subcollections keep their place below each document.</span>
+				} @else {
+					<span class="field-hint">
+						An array becomes one document per item (id from "__id", otherwise generated); an object becomes one document per
+						key. Whole numbers become integers, other numbers doubles, strings stay strings.
+					</span>
+				}
+			</span>
+		</label>
+	</fieldset>
+	@if (form.controls.targetType.value === "collection") {
+		<div class="field">
+			<label class="field-label" for="import-collection-path">Collection path</label>
+			<input id="import-collection-path" class="text-input" formControlName="collectionPath" autocomplete="off" spellcheck="false" />
+			@if (form.controls.collectionPath.touched && form.controls.collectionPath.invalid) {
+				<p class="field-error">Enter a collection path, such as users or users/dara/orders.</p>
+			}
+			@if (pathMapping(); as mapping) {
+				<p class="field-hint">{{ mapping }}</p>
+			}
+		</div>
+	}
+	<fieldset class="field">
+		<legend class="field-label">Existing documents</legend>
+		<label class="choice">
+			<input type="radio" formControlName="writeMode" value="overwrite" />
+			<span class="choice-text">
+				<span class="choice-title">Overwrite</span>
+				<span class="field-hint">Replace each existing document with the imported one.</span>
+			</span>
+		</label>
+		<label class="choice">
+			<input type="radio" formControlName="writeMode" value="merge" />
+			<span class="choice-text">
+				<span class="choice-title">Merge</span>
+				<span class="field-hint">Write the imported fields into existing documents and keep their other fields.</span>
+			</span>
+		</label>
+		<label class="choice">
+			<input type="radio" formControlName="writeMode" value="skip" />
+			<span class="choice-text">
+				<span class="choice-title">Skip</span>
+				<span class="field-hint">Leave existing documents unchanged and only create new ones.</span>
+			</span>
+		</label>
+	</fieldset>
+	<p class="field-hint">Canceling stops the import; documents already written stay.</p>
+	<div class="form-actions">
+		<button type="submit" class="button-primary" [disabled]="isPending()">
+			<lucide-icon name="upload" />
+			{{ isPending() ? "Starting…" : "Start import" }}
+		</button>
+	</div>
+</form>

@@ -11,9 +11,16 @@
         "@angular/forms": "19.2.25",
         "@angular/platform-browser": "19.2.25",
         "@angular/router": "19.2.25",
+        "@codemirror/autocomplete": "6.20.4",
         "@codemirror/lang-javascript": "6.2.5",
+        "@codemirror/language": "6.13.1",
+        "@codemirror/state": "6.7.6",
+        "@codemirror/view": "6.43.15",
         "@google-cloud/firestore": "9.4.0",
+        "@lezer/highlight": "1.2.5",
+        "@streamparser/json": "0.0.26",
         "codemirror": "6.0.2",
+        "csv-parse": "7.0.3",
         "google-auth-library": "11.3.1",
         "lucide-angular": "1.0.0",
         "rxjs": "7.8.2",
@@ -442,6 +449,8 @@
     "@sindresorhus/is": ["@sindresorhus/is@4.6.0", "", {}, "sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw=="],
 
     "@so-ric/colorspace": ["@so-ric/colorspace@1.1.6", "", { "dependencies": { "color": "^5.0.2", "text-hex": "1.0.x" } }, "sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw=="],
+
+    "@streamparser/json": ["@streamparser/json@0.0.26", "", {}, "sha512-46597LNFI+MFdUnzX2QJWwmdTRdq0XVD+vVNJTtGVzIrnCuhG9pFo1OAzbNBqci8UJgk/X5KJZ6LcV+y7PTuDQ=="],
 
     "@ts-morph/common": ["@ts-morph/common@0.22.0", "", { "dependencies": { "fast-glob": "^3.3.2", "minimatch": "^9.0.3", "mkdirp": "^3.0.1", "path-browserify": "^1.0.1" } }, "sha512-HqNBuV/oIlMKdkLshXd1zKBqNQCsuPEsgQOkfFQ/eUKjRlwndXW1AjN9LVkBEIukm00gGXSRmfkl0Wv5VXLnlw=="],
 

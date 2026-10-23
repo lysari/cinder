@@ -1,6 +1,6 @@
 # src/worker/firestore-client.ts
 
-Creates the `@google-cloud/firestore` client from resolved `DatabaseSettings`. The optional second argument passes `useBigInt` through; browse sessions set it so integers and doubles keep their stored type (see `firestore-value-decoder.md`), task scripts leave it off.
+Creates the `@google-cloud/firestore` client from resolved `DatabaseSettings`. The optional second argument passes `useBigInt` through; browse sessions and the export, import and CSV load tasks set it so integers and doubles keep their stored type (see `firestore-value-decoder.md`), task scripts leave it off.
 
 ## Transport
 

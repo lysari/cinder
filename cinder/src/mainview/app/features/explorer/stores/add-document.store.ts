@@ -3,12 +3,10 @@ import type { DatabaseTarget } from "../../../../../shared/interfaces/account.in
 import type { FirestoreDocument } from "../../../../../shared/interfaces/firestore-value.interface";
 import { isValidId } from "../../../../../shared/utils/firestore-validation";
 import type { FieldDraft } from "../../../shared/interfaces/value-draft.interface";
+import { createAutoId } from "../../../shared/utils/auto-id";
 import { errorMessage } from "../../../shared/utils/error-message";
 import { fieldsFromDrafts, hasFieldDraftError } from "../../../shared/utils/value-draft";
 import { ExplorerApiService } from "../services/explorer-api.service";
-
-const AUTO_ID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-const AUTO_ID_LENGTH = 20;
 
 @Injectable()
 export class AddDocumentStore {
@@ -48,9 +46,4 @@ export class AddDocumentStore {
 			this.isCreating.set(false);
 		}
 	}
-}
-
-function createAutoId(): string {
-	const randomBytes = crypto.getRandomValues(new Uint8Array(AUTO_ID_LENGTH));
-	return Array.from(randomBytes, (byte) => AUTO_ID_ALPHABET[byte % AUTO_ID_ALPHABET.length]).join("");
 }

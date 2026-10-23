@@ -1,0 +1,54 @@
+:host {
+	--bulk-update-preview-cell-max-width: 280px;
+
+	display: block;
+}
+
+.preview-scroll {
+	width: 100%;
+	overflow-x: auto;
+	border: var(--border-width) solid var(--border);
+	border-radius: var(--radius-md);
+
+	.preview-table {
+		min-width: 100%;
+		border-collapse: collapse;
+		font-size: var(--font-size-sm);
+		user-select: text;
+
+		th,
+		td {
+			max-width: var(--bulk-update-preview-cell-max-width);
+			padding: var(--space-3) var(--space-4);
+			border-bottom: var(--border-width) solid var(--border);
+			overflow: hidden;
+			text-align: left;
+			text-overflow: ellipsis;
+			vertical-align: top;
+			white-space: nowrap;
+		}
+
+		thead th {
+			background: var(--bg-table-header);
+			color: var(--text-secondary);
+			font-weight: var(--font-weight-medium);
+		}
+
+		.document-cell {
+			font-weight: var(--font-weight-medium);
+		}
+
+		.is-problem {
+			color: var(--text-danger);
+			white-space: normal;
+		}
+
+		.is-muted {
+			color: var(--text-muted);
+		}
+
+		.is-note {
+			color: var(--value-time);
+		}
+	}
+}

@@ -1,0 +1,91 @@
+<section class="transfer-page">
+	<header class="page-header">
+		<h1 class="page-title">Export</h1>
+		<p class="page-text">{{ accountLabel() }} / {{ projectId() }} / {{ databaseId() }}</p>
+	</header>
+	@if (sourceSummary(); as summary) {
+		<form class="form" [formGroup]="form" (ngSubmit)="start(false)">
+			<div class="field">
+				<span class="field-label">Source</span>
+				<p class="source-summary">{{ summary }}</p>
+			</div>
+			<fieldset class="field">
+				<legend class="field-label">Format</legend>
+				<label class="choice">
+					<input type="radio" formControlName="format" value="cinder-json" />
+					<span class="choice-text">
+						<span class="choice-title">Cinder JSON (.json)</span>
+						<span class="field-hint">Lossless: every type, path and nested value imports back exactly.</span>
+					</span>
+				</label>
+				<label class="choice">
+					<input type="radio" formControlName="format" value="ndjson" />
+					<span class="choice-text">
+						<span class="choice-title">NDJSON (.ndjson)</span>
+						<span class="field-hint">Lossless, one document per line; best for very large exports.</span>
+					</span>
+				</label>
+				<label class="choice">
+					<input type="radio" formControlName="format" value="readable-json" />
+					<span class="choice-text">
+						<span class="choice-title">Readable JSON (.json)</span>
+						<span class="field-hint">Plain JSON for people and other tools; timestamps, references and bytes become text.</span>
+					</span>
+				</label>
+				<label class="choice">
+					<input type="radio" formControlName="format" value="csv" />
+					<span class="choice-text">
+						<span class="choice-title">CSV (.csv)</span>
+						<span class="field-hint">One row per document; nested maps become dotted columns, arrays JSON text.</span>
+					</span>
+				</label>
+			</fieldset>
+			@if (canIncludeSubcollections()) {
+				<label class="choice">
+					<input type="checkbox" formControlName="isRecursive" />
+					<span class="choice-text">
+						<span class="choice-title">Include all subcollections</span>
+						<span class="field-hint">Exports the documents of every subcollection below, at any depth.</span>
+					</span>
+				</label>
+			}
+			<div class="field">
+				<span class="field-label">Folder</span>
+				<div class="folder-row">
+					<code class="folder-path">{{ store.folderPath() ?? "Loading…" }}</code>
+					<button type="button" class="button-secondary" (click)="store.chooseFolder()">
+						<lucide-icon name="folder-open" />
+						Choose folder…
+					</button>
+				</div>
+			</div>
+			<div class="field">
+				<label class="field-label" for="export-file-name">File name</label>
+				<input id="export-file-name" class="text-input" formControlName="fileName" autocomplete="off" spellcheck="false" />
+				@if (form.controls.fileName.touched && fileNameError(); as message) {
+					<p class="field-error">{{ message }}</p>
+				}
+			</div>
+			@if (store.replacedFilePath(); as filePath) {
+				<div class="replace-confirm" role="alert">
+					<p><code>{{ filePath }}</code> already exists. Replace it?</p>
+					<div class="form-actions">
+						<button type="button" class="button-danger" [disabled]="store.isStarting()" (click)="start(true)">Replace file</button>
+						<button type="button" class="button-secondary" (click)="store.cancelReplace()">Cancel</button>
+					</div>
+				</div>
+			}
+			@if (store.error(); as message) {
+				<p class="form-error" role="alert">{{ message }}</p>
+			}
+			<div class="form-actions">
+				<button type="submit" class="button-primary" [disabled]="store.isStarting() || store.folderPath() === null">
+					<lucide-icon name="download" />
+					{{ store.isStarting() ? "Starting…" : "Start export" }}
+				</button>
+			</div>
+		</form>
+	} @else {
+		<p class="form-error" role="alert">This export link does not name a valid collection, document or query.</p>
+	}
+</section>

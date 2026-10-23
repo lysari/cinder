@@ -1,0 +1,16 @@
+<div class="segmented-control" role="group" aria-label="View">
+	@if (hasTable()) {
+		<button type="button" class="segmented-button" [class.is-selected]="view() === 'table'" [attr.aria-pressed]="view() === 'table'" (click)="view.set('table')">
+			<lucide-icon name="table" />
+			Table
+		</button>
+	}
+	<button type="button" class="segmented-button" [class.is-selected]="view() === 'tree'" [attr.aria-pressed]="view() === 'tree'" (click)="view.set('tree')">
+		<lucide-icon name="list-tree" />
+		Tree
+	</button>
+	<button type="button" class="segmented-button" [class.is-selected]="view() === 'json'" [attr.aria-pressed]="view() === 'json'" (click)="view.set('json')">
+		<lucide-icon name="braces" />
+		JSON
+	</button>
+</div>

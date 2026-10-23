@@ -13,6 +13,14 @@
 	height: var(--pane-header-height);
 	padding: 0 var(--space-4) 0 var(--space-5);
 	border-bottom: var(--border-width) solid var(--border);
+
+	.icon-button {
+		margin-left: auto;
+	}
+
+	.import-link {
+		height: var(--control-height);
+	}
 }
 
 .database-body {

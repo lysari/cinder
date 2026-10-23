@@ -1,0 +1,122 @@
+<header class="page-header">
+	<h1 class="page-title">Query</h1>
+	<span class="database-label" [title]="accountLabel() + ' / ' + projectId() + ' / ' + databaseId()">
+		{{ accountLabel() }} / {{ projectId() }} / {{ databaseId() }}
+	</span>
+</header>
+@if (key(); as pageKey) {
+	@if (state(); as state) {
+		<div class="toolbar">
+			<div class="segmented-control" role="group" aria-label="Query mode">
+				<button
+					type="button"
+					class="segmented-button"
+					[class.is-selected]="state.mode === 'builder'"
+					[attr.aria-pressed]="state.mode === 'builder'"
+					title="Edit in the query builder"
+					(click)="store.showBuilder(pageKey)"
+				>
+					<lucide-icon name="list-filter" />
+					Builder
+				</button>
+				<button
+					type="button"
+					class="segmented-button"
+					[class.is-selected]="state.mode === 'javascript'"
+					[attr.aria-pressed]="state.mode === 'javascript'"
+					title="View as JavaScript"
+					(click)="store.showJavaScript(pageKey)"
+				>
+					<lucide-icon name="code" />
+					JavaScript
+				</button>
+			</div>
+			<div class="toolbar-actions">
+				@if (state.run; as run) {
+					<span class="run-status" [class]="'is-' + run.status" role="status">
+						<span class="status-label">{{ statusLabels[run.status] }}</span>
+						<span class="status-detail">{{ elapsed() }}</span>
+						@if (resultCount(); as count) {
+							<span class="status-detail">{{ count }}</span>
+						}
+					</span>
+				}
+				@if (exportLink(); as link) {
+					<a class="button-secondary" [routerLink]="link" title="Export every document of the builder query">
+						<lucide-icon name="download" />
+						Export
+					</a>
+				}
+				@if (bulkUpdateLink(); as link) {
+					<a class="button-secondary" [routerLink]="link" title="Change fields of every document the builder query matches">
+						<lucide-icon name="pencil-line" />
+						Bulk update
+					</a>
+				}
+				@if (deleteLink(); as link) {
+					<a class="icon-button" [routerLink]="link" aria-label="Delete matches" title="Delete every document the builder query matches">
+						<lucide-icon name="trash-2" />
+					</a>
+				}
+				@if (isRunning()) {
+					<button
+						type="button"
+						class="button-secondary"
+						[disabled]="state.run?.mode === 'javascript' && state.run?.taskId === null"
+						(click)="store.cancel(pageKey)"
+					>
+						<lucide-icon name="square" />
+						Cancel
+					</button>
+				} @else {
+					<button type="button" class="button-primary" title="Run (⌘↵)" [disabled]="!canRun()" (click)="store.run(pageKey)">
+						<lucide-icon name="play" />
+						Run
+					</button>
+				}
+			</div>
+		</div>
+		@if (state.switchError; as message) {
+			<p class="form-error switch-error" role="alert">{{ message }}</p>
+		}
+		@if (state.mode === "builder") {
+			<section class="editor-pane is-builder" aria-label="Query builder" (keydown.meta.enter)="store.run(pageKey)" (keydown.control.enter)="store.run(pageKey)">
+				<app-query-builder [value]="state.form" [issues]="issues()" (valueChange)="store.saveForm(pageKey, $event)" />
+			</section>
+		} @else {
+			<section class="editor-pane is-script" aria-label="JavaScript">
+				@defer (on immediate) {
+					<app-code-editor
+						label="Query script"
+						[value]="state.script"
+						[completionSources]="completionSources"
+						(valueChange)="store.saveScript(pageKey, $event)"
+						(runRequested)="store.run(pageKey)"
+					/>
+				} @placeholder {
+					<p class="editor-loading">Loading the editor…</p>
+				}
+			</section>
+		}
+		<section class="results-pane" aria-label="Results" aria-live="polite">
+			@if (state.run; as run) {
+				<app-query-results
+					[run]="run"
+					[database]="state.database"
+					[(view)]="documentView"
+					[liveStatus]="liveStatus()"
+					[liveError]="liveError()"
+					[canGoLive]="canGoLive()"
+					[changedPaths]="store.changedPaths()"
+					(loadMoreRequested)="store.loadMore(pageKey)"
+					(liveToggled)="liveStatus() === 'off' ? store.startLive(pageKey) : store.stopLive()"
+				/>
+			} @else {
+				<p class="results-placeholder">Run the query to see its results.</p>
+			}
+		</section>
+		@if (state.mode === "javascript" || state.run?.mode === "javascript") {
+			<app-query-console class="console-pane" [entries]="logEntries()" />
+		}
+	}
+}

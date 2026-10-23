@@ -1,0 +1,56 @@
+<section class="transfer-page">
+	<header class="page-header">
+		<h1 class="page-title">Import</h1>
+		<p class="page-text">{{ accountLabel() }} / {{ projectId() }} / {{ databaseId() }}</p>
+	</header>
+	<div class="file-row">
+		@if (store.file(); as file) {
+			<div class="file-summary">
+				<lucide-icon name="file-text" />
+				<span class="file-name">{{ file.fileName }}</span>
+				<span class="file-detail">{{ formatLabels[file.format] }}, {{ fileSize() }}</span>
+				@if (file.rootPath) {
+					<span class="file-detail">exported from {{ file.rootPath }}</span>
+				}
+				@if (file.exportedAt) {
+					<span class="file-detail">on {{ file.exportedAt | date: "yyyy-MM-dd HH:mm" }}</span>
+				}
+			</div>
+		} @else {
+			<p class="page-text">Choose a Cinder JSON or NDJSON export, a plain JSON file, or a CSV file.</p>
+		}
+		<button type="button" class="button-secondary" [disabled]="store.isChoosing()" (click)="store.chooseFile(database())">
+			<lucide-icon name="folder-open" />
+			{{ store.file() ? "Choose another file…" : "Choose file…" }}
+		</button>
+	</div>
+	@if (store.error(); as message) {
+		<p class="form-error" role="alert">{{ message }}</p>
+	}
+	@if (store.file(); as file) {
+		@if (file.format === "csv") {
+			@let task = store.analysisTask();
+			@if (store.analysis(); as analysis) {
+				<app-csv-load-form
+					[analysis]="analysis"
+					[collectionPath]="targetCollectionPath()"
+					[isPending]="store.isStarting()"
+					(submitted)="loadCsv(file, $event)"
+				/>
+			} @else if (task?.status === "failed" || task?.status === "canceled") {
+				<p class="form-error" role="alert">Analyzing the CSV file failed: {{ task?.error ?? "it was canceled." }}</p>
+			} @else {
+				<p class="page-text" role="status">
+					Analyzing the CSV file{{ analysisPercent() === null ? "…" : " (" + analysisPercent() + " %)…" }}
+				</p>
+			}
+		} @else {
+			<app-json-import-form
+				[file]="file"
+				[collectionPath]="targetCollectionPath()"
+				[isPending]="store.isStarting()"
+				(submitted)="importJson(file, $event)"
+			/>
+		}
+	}
+</section>

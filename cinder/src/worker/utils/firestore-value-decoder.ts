@@ -12,7 +12,7 @@ export function decodeValue(value: FirestoreValue, db: Firestore): unknown {
 		case "integer":
 			return BigInt(value.value);
 		case "double":
-			return Number(value.value);
+			return decodeDouble(Number(value.value));
 		case "bytes":
 			return Buffer.from(value.value, "base64");
 		case "timestamp":
@@ -33,4 +33,19 @@ export function decodeValue(value: FirestoreValue, db: Firestore): unknown {
 /** Turns tagged document fields into the object the SDK writes. Pass the fields of a create, set or update request. */
 export function decodeFields(fields: Record<string, FirestoreValue>, db: Firestore): Record<string, unknown> {
 	return Object.fromEntries(Object.entries(fields).map(([name, value]) => [name, decodeValue(value, db)]));
+}
+
+function decodeDouble(value: number): unknown {
+	return Number.isSafeInteger(value) && !Object.is(value, -0) ? new WholeDouble(value) : value;
+}
+
+// The SDK writes every safe-integer number as an integer; it writes an object marked "ProtoValue" through its own _toProto, which keeps a double.
+class WholeDouble {
+	readonly _protoValueType = "ProtoValue";
+
+	constructor(private readonly value: number) {}
+
+	_toProto(): { doubleValue: number } {
+		return { doubleValue: this.value };
+	}
 }

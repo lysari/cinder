@@ -16,6 +16,15 @@
 		>
 			<lucide-icon name="refresh-cw" />
 		</button>
+		<a class="icon-button" [routerLink]="exportLink()" aria-label="Export document" title="Export document">
+			<lucide-icon name="download" />
+		</a>
+		<a class="icon-button" [routerLink]="duplicateLink()" aria-label="Duplicate document" title="Duplicate document">
+			<lucide-icon name="copy-plus" />
+		</a>
+		<a class="icon-button" [routerLink]="copyLink()" aria-label="Copy or move document" title="Copy or move document">
+			<lucide-icon name="folder-input" />
+		</a>
 		<span class="copy-status" role="status">
 			@if (copyState() === "copied") {
 				Path copied

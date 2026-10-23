@@ -1,6 +1,7 @@
 import type { Subprocess } from "bun";
 import { totalmem } from "node:os";
-import type { Account } from "../../shared/interfaces/account.interface";
+import { EMPTY_TASK_PROGRESS } from "../../shared/constants/task";
+import type { Account, DatabaseTarget } from "../../shared/interfaces/account.interface";
 import type {
 	TaskProgress,
 	TaskRequest,
@@ -8,10 +9,11 @@ import type {
 	TaskUpdate,
 	WorkerTaskMessage,
 } from "../../shared/interfaces/task.interface";
+import { isSameDatabase } from "../../shared/utils/copy-validation";
 import { resolveDatabaseSettings } from "./database-settings";
 
 const HIGH_MEMORY_BYTES = 10 * 1024 ** 3;
-const EMPTY_PROGRESS: TaskProgress = { reads: 0, writes: 0, deletes: 0 };
+
 
 export const TASK_CONCURRENCY = totalmem() > HIGH_MEMORY_BYTES ? 4 : 2;
 
@@ -20,6 +22,7 @@ interface TaskQueueOptions {
 	concurrency: number;
 	findAccount: (accountId: string) => Account | undefined;
 	onUpdate: (update: TaskUpdate) => void;
+	cleanUp: (taskId: string, request: TaskRequest) => Promise<void>;
 }
 
 interface QueuedTask {
@@ -29,10 +32,12 @@ interface QueuedTask {
 
 interface RunningTask {
 	taskId: string;
+	request: TaskRequest;
 	worker: Subprocess;
 	progress: TaskProgress;
 	isCanceled: boolean;
 	hasEnded: boolean;
+	isDone: boolean;
 }
 
 export class TaskQueue {
@@ -71,8 +76,11 @@ export class TaskQueue {
 
 	private spawnWorker({ taskId, request }: QueuedTask): void {
 		const account = this.options.findAccount(request.database.accountId);
-		if (!account) {
-			this.report(taskId, "failed", `Account ${request.database.accountId} was not found.`);
+		const destination = destinationOf(request);
+		const destinationAccount = destination === null ? null : this.options.findAccount(destination.accountId);
+		if (!account || destinationAccount === undefined) {
+			const missingAccountId = account ? destination?.accountId : request.database.accountId;
+			this.report(taskId, "failed", `Account ${missingAccountId} was not found.`);
 			return;
 		}
 		const worker = Bun.spawn([process.execPath, this.options.workerPath], {
@@ -80,9 +88,22 @@ export class TaskQueue {
 			serialization: "json",
 			stdio: ["ignore", "inherit", "inherit"],
 		});
-		const runningTask: RunningTask = { taskId, worker, progress: EMPTY_PROGRESS, isCanceled: false, hasEnded: false };
+		const runningTask: RunningTask = {
+			taskId,
+			request,
+			worker,
+			progress: EMPTY_TASK_PROGRESS,
+			isCanceled: false,
+			hasEnded: false,
+			isDone: false,
+		};
 		this.runningTasks.set(taskId, runningTask);
-		const message: WorkerTaskMessage = { taskId, request, settings: resolveDatabaseSettings(account, request.database) };
+		const message: WorkerTaskMessage = {
+			taskId,
+			request,
+			settings: resolveDatabaseSettings(account, request.database),
+			destinationSettings: destination && destinationAccount ? resolveDatabaseSettings(destinationAccount, destination) : null,
+		};
 		worker.send(message);
 		this.report(taskId, "running", null);
 		void worker.exited.then(() => this.handleExit(runningTask));
@@ -94,10 +115,14 @@ export class TaskQueue {
 		}
 		runningTask.progress = update.progress;
 		runningTask.hasEnded = update.status === "done" || update.status === "failed";
+		runningTask.isDone = update.status === "done";
 		this.options.onUpdate({ ...update, taskId: runningTask.taskId });
 	}
 
-	private handleExit(runningTask: RunningTask): void {
+	private async handleExit(runningTask: RunningTask): Promise<void> {
+		if (!runningTask.isDone) {
+			await this.options.cleanUp(runningTask.taskId, runningTask.request);
+		}
 		if (runningTask.isCanceled) {
 			this.report(runningTask.taskId, "canceled", null);
 		} else if (!runningTask.hasEnded) {
@@ -108,9 +133,16 @@ export class TaskQueue {
 	}
 
 	private report(taskId: string, status: TaskStatus, error: string | null): void {
-		const progress = this.runningTasks.get(taskId)?.progress ?? EMPTY_PROGRESS;
+		const progress = this.runningTasks.get(taskId)?.progress ?? EMPTY_TASK_PROGRESS;
 		this.options.onUpdate({ taskId, status, progress, logEntries: [], result: null, error });
 	}
+}
+
+function destinationOf(request: TaskRequest): DatabaseTarget | null {
+	if (request.type !== "copy" || isSameDatabase(request.database, request.destination.database)) {
+		return null;
+	}
+	return request.destination.database;
 }
 
 function describeExit(worker: Subprocess): string {

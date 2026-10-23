@@ -1,5 +1,7 @@
 import type { DatabaseSettings, DatabaseTarget } from "./account.interface";
 import type { FirestoreDocument, FirestoreValue } from "./firestore-value.interface";
+import type { LiveQueryParams, LiveUpdate } from "./live.interface";
+import type { CountQueryParams, RunQueryParams } from "./query.interface";
 
 export interface ListCollectionsParams {
 	database: DatabaseTarget;
@@ -44,6 +46,11 @@ export interface DeleteDocumentParams {
 	isRecursive: boolean;
 }
 
+export interface UnlistenParams {
+	database: DatabaseTarget;
+	listenerId: string;
+}
+
 export interface DocumentPage {
 	documents: FirestoreDocument[];
 	hasMore: boolean;
@@ -56,7 +63,11 @@ export type BrowseOperation =
 	| { type: "createDocument"; params: CreateDocumentParams }
 	| { type: "updateDocument"; params: UpdateDocumentParams }
 	| { type: "setDocument"; params: SetDocumentParams }
-	| { type: "deleteDocument"; params: DeleteDocumentParams };
+	| { type: "deleteDocument"; params: DeleteDocumentParams }
+	| { type: "runQuery"; params: RunQueryParams }
+	| { type: "countQuery"; params: CountQueryParams }
+	| { type: "listen"; params: LiveQueryParams }
+	| { type: "unlisten"; params: UnlistenParams };
 
 export interface BrowseResponses {
 	listCollections: string[];
@@ -66,6 +77,10 @@ export interface BrowseResponses {
 	updateDocument: FirestoreDocument;
 	setDocument: FirestoreDocument;
 	deleteDocument: null;
+	runQuery: DocumentPage;
+	countQuery: number;
+	listen: null;
+	unlisten: null;
 }
 
 export type BrowseResponse<T extends BrowseOperation> = BrowseResponses[T["type"]];
@@ -82,3 +97,5 @@ export interface BrowseRequestMessage {
 export type BrowseResponseMessage =
 	| { requestId: number; result: BrowseResponses[BrowseOperation["type"]]; error: null }
 	| { requestId: number; result: null; error: string };
+
+export type BrowseWorkerMessage = BrowseResponseMessage | LiveUpdate;

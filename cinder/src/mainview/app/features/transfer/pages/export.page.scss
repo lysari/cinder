@@ -1,0 +1,65 @@
+:host {
+	display: block;
+}
+
+.transfer-page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-7);
+	max-width: var(--content-width);
+	padding: var(--space-8);
+
+	.page-header {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+
+		.page-title {
+			font-size: var(--font-size-lg);
+			font-weight: var(--font-weight-semibold);
+		}
+
+		.page-text {
+			color: var(--text-secondary);
+		}
+	}
+
+	.form {
+		.source-summary {
+			line-height: var(--line-height-text);
+			user-select: text;
+		}
+
+		.folder-row {
+			display: flex;
+			align-items: center;
+			gap: var(--space-4);
+
+			.folder-path {
+				flex: 1;
+				min-width: 0;
+				overflow: hidden;
+				color: var(--text-secondary);
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				user-select: text;
+			}
+		}
+
+		.replace-confirm {
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-5);
+			padding: var(--space-5);
+			border: var(--border-width) solid var(--danger-subtle-border);
+			border-radius: var(--radius-md);
+			background: var(--danger-subtle);
+			line-height: var(--line-height-text);
+
+			code {
+				word-break: break-all;
+				user-select: text;
+			}
+		}
+	}
+}

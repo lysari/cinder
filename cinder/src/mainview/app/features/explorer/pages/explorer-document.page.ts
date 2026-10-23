@@ -3,12 +3,14 @@ import { Router, RouterLink } from "@angular/router";
 import { LucideAngularModule } from "lucide-angular";
 import type { DatabaseTarget } from "../../../../../shared/interfaces/account.interface";
 import { parentPath } from "../../../../../shared/utils/firestore-path";
+import { formatTimestampUtc } from "../../../../../shared/utils/firestore-timestamp";
 import { AccountsStore } from "../../../core/stores/accounts.store";
+import { ValueEditorComponent } from "../../../shared/components/value-editor.component";
 import type { ValueDraft } from "../../../shared/interfaces/value-draft.interface";
 import { collectionRoute } from "../../../shared/utils/explorer-route";
-import { formatTimestampLocal, formatTimestampUtc } from "../../../shared/utils/firestore-value-format";
+import { formatTimestampLocal } from "../../../shared/utils/firestore-value-format";
+import { copyRoute, exportDocumentRoute } from "../../../shared/utils/transfer-route";
 import { ExplorerBreadcrumbComponent } from "../components/explorer-breadcrumb.component";
-import { ValueEditorComponent } from "../components/value-editor.component";
 import { DocumentStore } from "../stores/document.store";
 
 const COPIED_NOTICE_MS = 1500;
@@ -35,6 +37,9 @@ export class ExplorerDocumentPage {
 		databaseId: this.databaseId(),
 	}));
 	protected readonly accountLabel = computed(() => this.accounts.labelOf(this.accountId()));
+	protected readonly exportLink = computed(() => exportDocumentRoute(this.database(), this.documentPath()));
+	protected readonly duplicateLink = computed(() => copyRoute(this.database(), { type: "document", documentPath: this.documentPath() }, "duplicate"));
+	protected readonly copyLink = computed(() => copyRoute(this.database(), { type: "document", documentPath: this.documentPath() }, "copy"));
 	protected readonly rootDraft = computed<ValueDraft>(() => ({ type: "map", fields: this.store.fieldDrafts() }));
 	protected readonly times = computed(() => {
 		const document = this.store.document();

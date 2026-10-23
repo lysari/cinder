@@ -1,0 +1,16 @@
+<header class="console-header">
+	<lucide-icon name="terminal" />
+	<h2 class="console-title">Console</h2>
+	<span class="console-count">{{ entries().length }} {{ entries().length === 1 ? "line" : "lines" }}</span>
+</header>
+<ol class="console-lines" aria-label="Console output" aria-live="polite">
+	@for (entry of entries(); track $index) {
+		<li class="console-line" [class]="'is-' + entry.level">
+			<time class="line-time" [attr.datetime]="entry.time">{{ entry.time | date: "HH:mm:ss.SSS" }}</time>
+			<span class="line-level">{{ entry.level }}</span>
+			<span class="line-message">{{ entry.message }}</span>
+		</li>
+	} @empty {
+		<li class="console-empty">console.log, info, warn and error output of the script shows here.</li>
+	}
+</ol>

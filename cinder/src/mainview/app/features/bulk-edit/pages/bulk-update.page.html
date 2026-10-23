@@ -1,0 +1,161 @@
+<section class="bulk-page">
+	<header class="page-header">
+		<h1 class="page-title">Bulk update</h1>
+		<p class="page-text">{{ accountLabel() }} / {{ projectId() }} / {{ databaseId() }}</p>
+	</header>
+	@if (source()) {
+		<form class="form" [formGroup]="form" (ngSubmit)="preview()">
+			<div class="field">
+				<span class="field-label">Documents</span>
+				<p class="source-summary">{{ sourceSummary() }}</p>
+			</div>
+			<fieldset class="field" formArrayName="operations">
+				<legend class="field-label">Operations, applied in this order to each document</legend>
+				<ol class="operation-list">
+					@for (row of form.controls.operations.controls; track row; let index = $index) {
+						<li class="operation" [formGroupName]="index">
+							<div class="operation-head">
+								<span class="operation-number">{{ index + 1 }}</span>
+								<select class="text-input operation-type" formControlName="type" aria-label="Operation" (change)="resetValue(row, $event)">
+									<option value="set">Set field</option>
+									<option value="delete">Delete field</option>
+									<option value="rename">Rename field</option>
+									<option value="increment">Increment</option>
+									<option value="array-union">Add to array</option>
+									<option value="array-remove">Remove from array</option>
+									<option value="server-timestamp">Set to server time</option>
+								</select>
+								<input
+									class="text-input field-path"
+									formControlName="fieldPath"
+									aria-label="Field path"
+									placeholder="Field path, e.g. address.city"
+									autocomplete="off"
+									spellcheck="false"
+								/>
+								<button
+									type="button"
+									class="icon-button"
+									aria-label="Remove operation"
+									title="Remove operation"
+									[disabled]="form.controls.operations.length === 1"
+									(click)="removeOperation(index)"
+								>
+									<lucide-icon name="trash-2" />
+								</button>
+							</div>
+							@switch (row.controls.type.value) {
+								@case ("rename") {
+									<div class="operation-body">
+										<input
+											class="text-input field-path"
+											formControlName="newFieldPath"
+											aria-label="New field path"
+											placeholder="New field path"
+											autocomplete="off"
+											spellcheck="false"
+										/>
+										<label class="choice">
+											<input type="checkbox" formControlName="isOverwriting" />
+											<span class="choice-text">
+												<span class="choice-title">Overwrite the new field when it exists</span>
+												<span class="field-hint">Otherwise such a document is left unchanged and listed as failed. Documents without the field are skipped.</span>
+											</span>
+										</label>
+									</div>
+								}
+								@case ("delete") {
+									<p class="field-hint operation-body">Removes the field; documents without it are skipped.</p>
+								}
+								@case ("server-timestamp") {
+									<p class="field-hint operation-body">Firestore writes its own time when it applies the update.</p>
+								}
+								@default {
+									<div class="operation-body">
+										<app-value-editor [draft]="row.controls.value.value" (draftChange)="row.controls.value.setValue($event)" />
+										@switch (row.controls.type.value) {
+											@case ("increment") {
+												<p class="field-hint">An integer added to an integer stays an integer; with a double on either side the result is a double. A missing or non-number field is set to this value.</p>
+											}
+											@case ("array-union") {
+												<p class="field-hint">Adds each value the array does not hold yet; a missing or non-array field becomes this list.</p>
+											}
+											@case ("array-remove") {
+												<p class="field-hint">Removes every item equal to one of these values; values match only with the same type.</p>
+											}
+										}
+									</div>
+								}
+							}
+							@for (message of issuesOf(index); track $index) {
+								<p class="field-error">{{ message }}</p>
+							}
+						</li>
+					}
+				</ol>
+				@for (issue of listIssues(); track $index) {
+					<p class="field-error">{{ issue.message }}</p>
+				}
+				<button type="button" class="button-secondary add-button" (click)="addOperation()">
+					<lucide-icon name="plus" />
+					Add operation
+				</button>
+			</fieldset>
+			@if (store.error(); as message) {
+				<p class="form-error" role="alert">{{ message }}</p>
+			}
+			@if (store.matchCount(); as count) {
+				<div class="run-confirm" role="alert">
+					<p class="run-warning">
+						Update <strong>{{ count }}</strong> matching {{ count === 1 ? "document" : "documents" }}? Each document is updated on its own,
+						so the change is not atomic: if the task fails or you cancel it, documents updated so far keep the change. A document that
+						changes while the task runs is not updated and is listed as failed.
+					</p>
+					<div class="form-actions">
+						<button type="button" class="button-danger" [disabled]="store.isBusy()" (click)="run()">
+							Update {{ count }} {{ count === 1 ? "document" : "documents" }}
+						</button>
+						<button type="button" class="button-secondary" (click)="store.cancelRun()">Cancel</button>
+					</div>
+				</div>
+			} @else if (store.matchCount() === 0) {
+				<p class="field-hint">No document matches, so there is nothing to update.</p>
+			}
+			<div class="form-actions">
+				<button type="submit" class="button-secondary" [disabled]="store.isBusy()">
+					<lucide-icon name="eye" />
+					Preview
+				</button>
+				<button type="button" class="button-primary" [disabled]="store.isBusy()" (click)="askToRun()">
+					<lucide-icon name="play" />
+					Run…
+				</button>
+			</div>
+		</form>
+		@if (store.previewTask(); as task) {
+			<section class="preview" aria-labelledby="preview-title" aria-live="polite">
+				<h2 id="preview-title" class="section-title">Preview</h2>
+				@let documents = previewDocuments();
+				@if (task.status === "queued" || task.status === "running") {
+					<p class="field-hint">Reading documents…</p>
+				} @else if (task.error) {
+					<p class="form-error" role="alert">{{ task.error }}</p>
+				} @else if (documents) {
+					@if (isPreviewStale()) {
+						<p class="field-hint">The operations changed after this preview; preview again to see their effect.</p>
+					}
+					@if (documents.length === 0) {
+						<p class="field-hint">No document matches.</p>
+					} @else {
+						<p class="field-hint">
+							The first {{ documents.length }} matching documents. Nothing was written; the after column shows what the update would store.
+						</p>
+						<app-bulk-update-preview [documents]="documents" [database]="database()" />
+					}
+				}
+			</section>
+		}
+	} @else {
+		<p class="form-error" role="alert">This link does not name a valid collection or query.</p>
+	}
+</section>

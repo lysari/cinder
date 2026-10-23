@@ -1,0 +1,10 @@
+export const MAX_TABS = 100;
+export const MAX_TAB_URL_LENGTH = 8192;
+export const MAX_SIDEBAR_EXPANDED_IDS = 2000;
+export const MAX_SIDEBAR_ID_LENGTH = 2048;
+export const MAX_QUERY_PAGES = 500;
+export const MAX_QUERY_FORM_ROWS = 100;
+export const MAX_QUERY_FORM_TEXT_LENGTH = 10_000;
+export const MAX_SCRIPT_LENGTH = 1_000_000;
+export const START_URL = "/";
+export const TAB_ID_PATTERN = /^[A-Za-z0-9-]{1,64}$/;

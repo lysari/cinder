@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import type { EmulatorDatabaseSettings } from "../../src/shared/interfaces/account.interface";
 import type { TaskUpdate, WorkerTaskMessage } from "../../src/shared/interfaces/task.interface";
+import { generateQueryScript } from "../../src/shared/utils/query-script";
 import { createFirestore } from "../../src/worker/firestore-client";
 
 const WORKER_PATH = join(import.meta.dir, "../../src/worker/index.ts");
@@ -31,6 +32,7 @@ function startWorker(script: string) {
 			script,
 		},
 		settings: SETTINGS,
+		destinationSettings: null,
 	};
 	worker.send(message);
 	return { worker, updates };
@@ -96,6 +98,27 @@ describe("worker run-script", () => {
 		expect(update.status).toBe("done");
 		expect(update.result?.kind).toBe("documents");
 		expect(update.result).toMatchObject({ documents: [{ id: "beta", fields: { name: { type: "string", value: "Beta" } } }] });
+	});
+
+	test("runs a generated query script with every clause", async () => {
+		const script = generateQueryScript({
+			target: { type: "collection", collectionPath: COLLECTION },
+			filters: [
+				{ fieldPath: "count", operator: ">=", value: { type: "integer", value: "1" } },
+				{
+					fieldPath: "name",
+					operator: "in",
+					value: { type: "array", value: [{ type: "string", value: "Alpha" }, { type: "string", value: "Beta" }] },
+				},
+				{ fieldPath: "createdAt", operator: "<", value: { type: "timestamp", value: { seconds: 1700000200, nanos: 0 } } },
+			],
+			orders: [{ fieldPath: "count", direction: "desc" }],
+			limit: 1,
+		});
+		const update = lastUpdate(await runWorker(script));
+		expect(update.status).toBe("done");
+		expect(update.result).toMatchObject({ kind: "documents", documents: [{ id: "alpha" }] });
+		expect(update.result?.kind === "documents" && update.result.documents.length).toBe(1);
 	});
 
 	test("returns a plain object", async () => {

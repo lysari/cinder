@@ -1,0 +1,14 @@
+<header class="page-header">
+	<h1 class="page-title">Tasks</h1>
+	<span class="page-detail">{{ store.activeTasks().length }} running, {{ store.tasks().length }} in this session</span>
+</header>
+<section class="tasks-body" aria-live="polite">
+	@for (task of store.tasks(); track task.id) {
+		<app-task-item [task]="task" [isHighlighted]="task.id === this.task()" (cancelRequested)="store.cancel(task.id)" />
+	} @empty {
+		<div class="tasks-empty">
+			<lucide-icon name="activity" />
+			<p>No tasks in this session yet. Exports, imports and scripts show here while they run.</p>
+		</div>
+	}
+</section>

@@ -1,10 +1,19 @@
 import { DocumentReference, Firestore, GeoPoint, Timestamp, VectorValue } from "@google-cloud/firestore";
 import { describe, expect, test } from "bun:test";
+import type { EmulatorDatabaseSettings } from "../../../src/shared/interfaces/account.interface";
 import type { FirestoreValue } from "../../../src/shared/interfaces/firestore-value.interface";
+import { createFirestore } from "../../../src/worker/firestore-client";
 import { decodeFields, decodeValue } from "../../../src/worker/utils/firestore-value-decoder";
-import { encodeValue } from "../../../src/worker/utils/firestore-value-encoder";
+import { encodeBigIntDocument, encodeValue } from "../../../src/worker/utils/firestore-value-encoder";
 
 const db = new Firestore({ projectId: "demo-cinder" });
+const EMULATOR_SETTINGS: EmulatorDatabaseSettings = {
+	type: "emulator",
+	projectId: "demo-cinder",
+	databaseId: "(default)",
+	host: "127.0.0.1",
+	port: 8080,
+};
 
 const ROUND_TRIP_VALUES: FirestoreValue[] = [
 	{ type: "null" },
@@ -53,9 +62,30 @@ describe("decodeValue", () => {
 		expect(decodeValue({ type: "vector", value: [1, 2] }, db)).toBeInstanceOf(VectorValue);
 	});
 
-	test("decodes a whole-number double to a plain number, which the SDK writes as an integer", () => {
-		expect(decodeValue({ type: "double", value: 2 }, db)).toBe(2);
-		expect(encodeValue(decodeValue({ type: "double", value: 2 }, db))).toEqual({ type: "integer", value: "2" });
+	test("stores a whole-number double as a double and a negative zero as itself", async () => {
+		const emulator = createFirestore(EMULATOR_SETTINGS, { useBigInt: true });
+		const reference = emulator.doc(`decoder-test-${crypto.randomUUID()}/doubles`);
+		await reference.set(
+			decodeFields(
+				{
+					whole: { type: "double", value: 2 },
+					negativeZero: { type: "double", value: -0 },
+					nested: { type: "map", value: { list: { type: "array", value: [{ type: "double", value: 3 }] } } },
+					integer: { type: "integer", value: "2" },
+				},
+				emulator,
+			),
+		);
+		const document = encodeBigIntDocument(await reference.get());
+		await emulator.recursiveDelete(reference.parent);
+		await emulator.terminate();
+		expect(document.fields).toEqual({
+			whole: { type: "double", value: 2 },
+			negativeZero: { type: "double", value: -0 },
+			nested: { type: "map", value: { list: { type: "array", value: [{ type: "double", value: 3 }] } } },
+			integer: { type: "integer", value: "2" },
+		});
+		expect(Object.is((document.fields.negativeZero as { value: number }).value, -0)).toBe(true);
 	});
 });
 

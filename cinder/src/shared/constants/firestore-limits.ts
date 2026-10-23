@@ -1,4 +1,5 @@
 export const MAX_ID_BYTES = 1500;
+export const MAX_FIELD_PATH_BYTES = 1500;
 export const MAX_VALUE_DEPTH = 20;
 export const MIN_INTEGER = -(2n ** 63n);
 export const MAX_INTEGER = 2n ** 63n - 1n;

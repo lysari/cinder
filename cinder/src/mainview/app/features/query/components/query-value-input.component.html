@@ -1,0 +1,26 @@
+@let controls = group().controls;
+<select class="text-input type-select" [formControl]="controls.type" [attr.aria-label]="label() + ' type'" (change)="fitTextToType($event)">
+	<option value="string">string</option>
+	<option value="integer">integer</option>
+	<option value="double">double</option>
+	<option value="boolean">boolean</option>
+	<option value="null">null</option>
+	<option value="timestamp">timestamp</option>
+</select>
+@switch (controls.type.value) {
+	@case ("boolean") {
+		<select class="text-input value-input" [formControl]="controls.text" [attr.aria-label]="label()">
+			<option value="true">true</option>
+			<option value="false">false</option>
+		</select>
+	}
+	@case ("null") {
+		<span class="null-value">null</span>
+	}
+	@case ("timestamp") {
+		<input class="text-input value-input" [formControl]="controls.text" [attr.aria-label]="label()" placeholder="2026-10-23T07:05:00Z" autocomplete="off" spellcheck="false" />
+	}
+	@default {
+		<input class="text-input value-input" [formControl]="controls.text" [attr.aria-label]="label()" placeholder="Value" autocomplete="off" spellcheck="false" />
+	}
+}

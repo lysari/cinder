@@ -1,0 +1,41 @@
+<ul class="tab-list">
+	@for (label of labels(); track label.tab.id) {
+		@let isActive = label.tab.id === tabs.activeTabId();
+		<li
+			class="tab"
+			[class.is-active]="isActive"
+			[attr.data-tab-id]="label.tab.id"
+			(auxclick)="closeOnMiddleClick($event, label.tab.id)"
+			(mousedown)="preventAutoscroll($event)"
+		>
+			<button
+				type="button"
+				class="tab-button"
+				[attr.aria-current]="isActive ? 'page' : null"
+				[title]="label.tooltip"
+				(click)="tabs.activate(label.tab.id)"
+			>
+				<span class="tab-title">{{ label.title }}</span>
+			</button>
+			<button
+				type="button"
+				class="tab-close"
+				[attr.aria-label]="'Close tab ' + label.title"
+				title="Close tab (⌘W)"
+				(click)="tabs.close(label.tab.id)"
+			>
+				<lucide-icon name="x" />
+			</button>
+		</li>
+	}
+</ul>
+<button
+	type="button"
+	class="icon-button new-tab"
+	aria-label="New tab"
+	title="New tab (⌘T)"
+	[disabled]="!tabs.canOpenTab()"
+	(click)="tabs.newTab()"
+>
+	<lucide-icon name="plus" />
+</button>

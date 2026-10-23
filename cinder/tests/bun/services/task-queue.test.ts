@@ -7,10 +7,12 @@ import { createFirestore } from "../../../src/worker/firestore-client";
 
 const WORKER_PATH = join(import.meta.dir, "../../../src/worker/index.ts");
 const ACCOUNT: EmulatorAccount = { id: "emulator", type: "emulator", host: "127.0.0.1", port: 8080, projectIds: ["demo-cinder"] };
+const OTHER_ACCOUNT: EmulatorAccount = { ...ACCOUNT, id: "other-emulator", projectIds: ["demo-cinder-copy"] };
 const PROJECT_ID = "demo-cinder";
 const COLLECTION = `task-queue-test-${crypto.randomUUID()}`;
 const ENDED_STATUSES: TaskStatus[] = ["done", "failed", "canceled"];
 const db = createFirestore({ type: "emulator", projectId: PROJECT_ID, databaseId: "(default)", host: ACCOUNT.host, port: ACCOUNT.port });
+const otherDb = createFirestore({ type: "emulator", projectId: "demo-cinder-copy", databaseId: "(default)", host: ACCOUNT.host, port: ACCOUNT.port });
 
 function scriptRequest(script: string, accountId = ACCOUNT.id): TaskRequest {
 	return { type: "run-script", database: { accountId, projectId: PROJECT_ID, databaseId: "(default)" }, script };
@@ -22,11 +24,15 @@ function sleepScript(milliseconds: number): string {
 
 function createQueue(concurrency: number, workerPath = WORKER_PATH) {
 	const updates: TaskUpdate[] = [];
+	const cleanedTaskIds: string[] = [];
 	const queue = new TaskQueue({
 		workerPath,
 		concurrency,
-		findAccount: (accountId) => (accountId === ACCOUNT.id ? ACCOUNT : undefined),
+		findAccount: (accountId) => [ACCOUNT, OTHER_ACCOUNT].find((account) => account.id === accountId),
 		onUpdate: (update) => updates.push(update),
+		cleanUp: async (taskId) => {
+			cleanedTaskIds.push(taskId);
+		},
 	});
 	const statusesOf = (taskId: string) => updates.filter((update) => update.taskId === taskId).map((update) => update.status);
 	const waitForStatus = async (taskId: string, statuses: TaskStatus[]) => {
@@ -35,17 +41,32 @@ function createQueue(concurrency: number, workerPath = WORKER_PATH) {
 		}
 	};
 	const waitForEnd = (taskId: string) => waitForStatus(taskId, ENDED_STATUSES);
-	return { queue, updates, statusesOf, waitForStatus, waitForEnd };
+	return { queue, updates, cleanedTaskIds, statusesOf, waitForStatus, waitForEnd };
+}
+
+function copyRequest(destinationAccountId: string): TaskRequest {
+	return {
+		type: "copy",
+		database: { accountId: ACCOUNT.id, projectId: PROJECT_ID, databaseId: "(default)" },
+		source: { type: "collection", collectionPath: COLLECTION },
+		destination: { database: { accountId: destinationAccountId, projectId: "demo-cinder-copy", databaseId: "(default)" }, path: COLLECTION },
+		isMove: false,
+		isRecursive: false,
+		writeMode: "overwrite",
+		isRewritingReferences: false,
+	};
 }
 
 afterAll(async () => {
 	await db.recursiveDelete(db.collection(COLLECTION));
+	await otherDb.recursiveDelete(otherDb.collection(COLLECTION));
 	await db.terminate();
+	await otherDb.terminate();
 });
 
 describe("TaskQueue", () => {
 	test("runs at most the configured number of tasks at once", async () => {
-		const { queue, updates, statusesOf, waitForEnd } = createQueue(2);
+		const { queue, updates, cleanedTaskIds, statusesOf, waitForEnd } = createQueue(2);
 		const taskIds = [queue.start(scriptRequest(sleepScript(400))), queue.start(scriptRequest(sleepScript(400))), queue.start(scriptRequest(sleepScript(400)))];
 		await Promise.all(taskIds.map(waitForEnd));
 
@@ -66,6 +87,7 @@ describe("TaskQueue", () => {
 		for (const taskId of taskIds) {
 			expect(statusesOf(taskId)).toEqual(["queued", "running", "done"]);
 		}
+		expect(cleanedTaskIds).toEqual([]);
 	});
 
 	test("removes a canceled task from the queue before it starts", async () => {
@@ -80,7 +102,7 @@ describe("TaskQueue", () => {
 	});
 
 	test("kills the worker of a canceled running task", async () => {
-		const { queue, statusesOf, waitForStatus, waitForEnd } = createQueue(1);
+		const { queue, cleanedTaskIds, statusesOf, waitForStatus, waitForEnd } = createQueue(1);
 		const path = `${COLLECTION}/written-after-cancel`;
 		const taskId = queue.start(
 			scriptRequest(`async function run() {
@@ -93,6 +115,7 @@ describe("TaskQueue", () => {
 		await waitForEnd(taskId);
 		await Bun.sleep(2000);
 		expect(statusesOf(taskId)).toEqual(["queued", "running", "canceled"]);
+		expect(cleanedTaskIds).toEqual([taskId]);
 		expect((await db.doc(path).get()).exists).toBe(false);
 	});
 
@@ -108,6 +131,22 @@ describe("TaskQueue", () => {
 	test("fails a task whose account is unknown", async () => {
 		const { queue, updates, waitForEnd } = createQueue(1);
 		const taskId = queue.start(scriptRequest(sleepScript(0), "unknown"));
+		await waitForEnd(taskId);
+		expect(updates.at(-1)).toMatchObject({ status: "failed", error: "Account unknown was not found." });
+	});
+
+	test("copies between the databases of two accounts", async () => {
+		await db.doc(`${COLLECTION}/copied`).set({ n: 1.5 });
+		const { queue, updates, waitForEnd } = createQueue(1);
+		const taskId = queue.start(copyRequest(OTHER_ACCOUNT.id));
+		await waitForEnd(taskId);
+		expect(updates.at(-1)).toMatchObject({ status: "done", result: { kind: "writes", writeCount: 1 } });
+		expect((await otherDb.doc(`${COLLECTION}/copied`).get()).get("n")).toBe(1.5);
+	});
+
+	test("fails a copy whose destination account is unknown", async () => {
+		const { queue, updates, waitForEnd } = createQueue(1);
+		const taskId = queue.start(copyRequest("unknown"));
 		await waitForEnd(taskId);
 		expect(updates.at(-1)).toMatchObject({ status: "failed", error: "Account unknown was not found." });
 	});

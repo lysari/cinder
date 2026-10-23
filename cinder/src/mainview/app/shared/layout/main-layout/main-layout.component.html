@@ -1,7 +1,13 @@
 <div class="shell">
 	<app-sidebar />
-	<main class="content">
-		<router-outlet />
-	</main>
+	<div class="workspace">
+		<app-tab-strip />
+		<main class="content">
+			<router-outlet />
+		</main>
+	</div>
 	<app-statusbar />
 </div>
+@if (isPaletteOpen()) {
+	<app-command-palette (closed)="isPaletteOpen.set(false)" />
+}

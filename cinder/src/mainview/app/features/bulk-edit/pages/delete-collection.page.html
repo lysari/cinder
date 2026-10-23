@@ -1,0 +1,57 @@
+<section class="delete-page">
+	<header class="page-header">
+		<h1 class="page-title">{{ source()?.type === "query" ? "Delete matching documents" : "Delete collection" }}</h1>
+		<p class="page-text">{{ accountLabel() }} / {{ projectId() }} / {{ databaseId() }}</p>
+	</header>
+	@if (source(); as current) {
+		<div class="delete-confirm" role="group" aria-labelledby="delete-warning">
+			<p id="delete-warning" class="delete-warning">
+				<lucide-icon name="triangle-alert" />
+				@if (current.type === "collection") {
+					<span>
+						Deletes every document of <code>{{ current.collectionPath }}</code> and every subcollection below it, at any depth. This cannot
+						be undone.
+					</span>
+				} @else {
+					<span>
+						Deletes every document the {{ queryDescription() }} matches. Their subcollections stay. This cannot be undone.
+					</span>
+				}
+			</p>
+			@let count = store.documentCount();
+			<p class="page-text" aria-live="polite">
+				@switch (count.status) {
+					@case ("loading") {
+						Counting documents…
+					}
+					@case ("failed") {
+						The documents could not be counted: {{ count.error }}
+					}
+					@default {
+						@if (current.type === "collection") {
+							{{ count.value }} {{ count.value === 1 ? "document" : "documents" }} in this collection, plus the documents of its subcollections.
+						} @else {
+							{{ count.value }} matching {{ count.value === 1 ? "document" : "documents" }}.
+						}
+					}
+				}
+			</p>
+			<p class="page-text">The delete runs as a task. Canceling it stops it; documents deleted before stay deleted.</p>
+			<div class="field">
+				<label class="field-label" for="delete-confirmation">Type <code>{{ confirmationText() }}</code> to confirm</label>
+				<input id="delete-confirmation" class="text-input" [formControl]="typedText" autocomplete="off" spellcheck="false" />
+			</div>
+			@if (store.error(); as message) {
+				<p class="form-error" role="alert">{{ message }}</p>
+			}
+			<div class="form-actions">
+				<button type="button" class="button-danger" [disabled]="!isConfirmed() || store.isStarting()" (click)="delete()">
+					<lucide-icon name="trash-2" />
+					{{ store.isStarting() ? "Starting…" : current.type === "collection" ? "Delete collection" : "Delete documents" }}
+				</button>
+			</div>
+		</div>
+	} @else {
+		<p class="form-error" role="alert">This link does not name a valid collection or query.</p>
+	}
+</section>

@@ -5,7 +5,11 @@ import {
 	parseDocumentParams,
 	parseListCollectionsParams,
 	parseListDocumentsParams,
+	parseLiveQueryParams,
+	parseCountQueryParams,
+	parseRunQueryParams,
 	parseSetDocumentParams,
+	parseStopLiveParams,
 	parseUpdateDocumentParams,
 } from "../../src/bun/browse-request-parser";
 import type { FirestoreValue } from "../../src/shared/interfaces/firestore-value.interface";
@@ -162,5 +166,104 @@ describe("tagged value parsing", () => {
 			deepValue = { type: "map", value: { inner: deepValue } };
 		}
 		expect(setWith(deepValue)).toThrow("Values may nest at most 20 levels deep.");
+	});
+});
+
+describe("parseRunQueryParams", () => {
+	const query = {
+		target: { type: "collection", collectionPath: "users" },
+		filters: [
+			{ fieldPath: "age", operator: ">=", value: { type: "integer", value: "18" } },
+			{ fieldPath: "status", operator: "in", value: { type: "array", value: [{ type: "string", value: "active" }, { type: "null" }] } },
+		],
+		orders: [{ fieldPath: "age", direction: "desc" }],
+		limit: 20,
+	};
+	const params = { database: DATABASE, query, pageSize: 50, startAfter: null };
+
+	function runWith(changes: Record<string, unknown>) {
+		return () => parseRunQueryParams({ ...params, query: { ...query, ...changes } });
+	}
+
+	test("accepts a valid query, a cursor and a collection group, and drops unknown fields", () => {
+		expect(parseRunQueryParams({ ...params, extra: 1, query: { ...query, extra: 2 } })).toEqual(
+			params as ReturnType<typeof parseRunQueryParams>,
+		);
+		const cursor = { documentPath: "users/dara", documentCount: 50 };
+		expect(parseRunQueryParams({ ...params, startAfter: cursor }).startAfter).toEqual(cursor);
+		expect(runWith({ target: { type: "collection-group", collectionId: "orders", collectionPath: "x" } })().query.target).toEqual({
+			type: "collection-group",
+			collectionId: "orders",
+		});
+	});
+
+	test("rejects malformed shapes", () => {
+		expect(() => parseRunQueryParams({ ...params, query: null })).toThrow("The query needs a target, filters and orders.");
+		expect(runWith({ target: { type: "table", collectionPath: "users" } })).toThrow(
+			"The query target must be a collection path or a collection group id.",
+		);
+		expect(runWith({ filters: [{ fieldPath: "age", operator: "LIKE", value: { type: "null" } }] })).toThrow(
+			"Each filter needs a field path, a known operator and a value.",
+		);
+		expect(runWith({ filters: [{ fieldPath: "age", operator: "==", value: { type: "geopoint", value: { latitude: 0, longitude: 0 } } }] })).toThrow(
+			"A filter value must be a string, integer, double, boolean, null or timestamp, or a list of those.",
+		);
+		expect(runWith({ filters: [{ fieldPath: "age", operator: "in", value: { type: "array", value: [{ type: "map", value: {} }] } }] })).toThrow(
+			"A filter value must be",
+		);
+		expect(runWith({ filters: [{ fieldPath: "age", operator: "==", value: { type: "integer", value: "1.5" } }] })).toThrow("An integer");
+		expect(runWith({ orders: [{ fieldPath: "age", direction: "up" }] })).toThrow("Each order needs a field path and the direction asc or desc.");
+		expect(runWith({ limit: "20" })).toThrow("The query limit must be a number or null.");
+	});
+
+	test("rejects a query the shared validator refuses", () => {
+		expect(runWith({ target: { type: "collection", collectionPath: "users/dara" } })).toThrow(
+			"The query cannot run: Enter a collection path such as users or users/dara/orders.",
+		);
+		expect(runWith({ filters: [{ fieldPath: "status", operator: "in", value: { type: "string", value: "x" } }] })).toThrow(
+			"The query cannot run: in needs a list of values.",
+		);
+		expect(runWith({ limit: 0 })).toThrow("The query cannot run: The limit must be a whole number from 1 to 2147483647.");
+	});
+
+	test("rejects bad page sizes and cursors", () => {
+		expect(() => parseRunQueryParams({ ...params, pageSize: 501 })).toThrow("The page size must be a whole number from 1 to 500.");
+		for (const startAfter of [{ documentPath: "users", documentCount: 1 }, { documentPath: "users/dara", documentCount: 0 }, "users/dara"]) {
+			expect(() => parseRunQueryParams({ ...params, startAfter })).toThrow(
+				"The query cursor needs the last loaded document path and how many documents are loaded.",
+			);
+		}
+	});
+});
+
+describe("parseCountQueryParams", () => {
+	const database = { accountId: "emulator", projectId: "demo-cinder", databaseId: "(default)" };
+	const query = { target: { type: "collection", collectionPath: "users" }, filters: [], orders: [], limit: 5 };
+
+	test("accepts a valid query and drops unknown fields", () => {
+		expect(parseCountQueryParams({ database, query, extra: true })).toEqual({ database, query } as ReturnType<typeof parseCountQueryParams>);
+	});
+
+	test("rejects a query that cannot run", () => {
+		expect(() => parseCountQueryParams({ database, query: { ...query, limit: -1 } })).toThrow("The query cannot run:");
+	});
+});
+
+describe("parseLiveQueryParams", () => {
+	const query = { target: { type: "collection", collectionPath: "users" }, filters: [], orders: [], limit: null };
+
+	test("accepts a valid query, listener id and window size", () => {
+		const params = { listenerId: "4f1c-aa", database: DATABASE, query, limit: 50 };
+		expect(parseLiveQueryParams(params)).toEqual(params as never);
+		expect(parseStopLiveParams({ listenerId: "4f1c-aa" })).toEqual({ listenerId: "4f1c-aa" });
+	});
+
+	test("refuses a bad listener id, an unbounded window and a query Firestore would refuse", () => {
+		expect(() => parseLiveQueryParams({ listenerId: "../x", database: DATABASE, query, limit: 50 })).toThrow("letters, digits or dashes");
+		expect(() => parseLiveQueryParams({ listenerId: "a", database: DATABASE, query, limit: 0 })).toThrow("1 to 1000 documents");
+		expect(() => parseLiveQueryParams({ listenerId: "a", database: DATABASE, query, limit: 1001 })).toThrow("1 to 1000 documents");
+		const badQuery = { ...query, target: { type: "collection", collectionPath: "users/dara" } };
+		expect(() => parseLiveQueryParams({ listenerId: "a", database: DATABASE, query: badQuery, limit: 5 })).toThrow("The query cannot run");
+		expect(() => parseStopLiveParams({})).toThrow("letters, digits or dashes");
 	});
 });

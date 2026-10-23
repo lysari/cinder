@@ -2,37 +2,64 @@
 	<app-explorer-breadcrumb [database]="database()" [accountLabel]="accountLabel()" [path]="collectionPath()" />
 </header>
 <div class="toolbar">
-	<div class="view-switcher" role="group" aria-label="View">
-		<button type="button" class="view-button" [class.is-selected]="view() === 'table'" [attr.aria-pressed]="view() === 'table'" (click)="view.set('table')">
-			<lucide-icon name="table" />
-			Table
-		</button>
-		<button type="button" class="view-button" [class.is-selected]="view() === 'tree'" [attr.aria-pressed]="view() === 'tree'" (click)="view.set('tree')">
-			<lucide-icon name="list-tree" />
-			Tree
-		</button>
-		<button type="button" class="view-button" [class.is-selected]="view() === 'json'" [attr.aria-pressed]="view() === 'json'" (click)="view.set('json')">
-			<lucide-icon name="braces" />
-			JSON
-		</button>
-	</div>
+	<app-view-switcher [(view)]="view" />
 	<div class="toolbar-actions">
+		<button
+			type="button"
+			class="live-toggle"
+			[class.is-live]="store.liveStatus() !== 'off'"
+			[attr.aria-pressed]="store.liveStatus() !== 'off'"
+			[disabled]="store.status() !== 'loaded' || isLiveTooLarge()"
+			[title]="isLiveTooLarge() ? 'Live follows at most ' + maxLiveDocuments + ' documents' : 'Follow changes to the loaded documents as they happen'"
+			(click)="store.liveStatus() === 'off' ? store.startLive() : store.stopLive()"
+		>
+			<span class="live-dot" aria-hidden="true"></span>
+			Live
+		</button>
 		<button
 			type="button"
 			class="icon-button"
 			aria-label="Refresh"
-			title="Refresh"
-			[disabled]="store.status() === 'loading'"
+			[title]="store.liveStatus() === 'off' ? 'Refresh' : 'Live updates are on'"
+			[disabled]="store.status() === 'loading' || store.liveStatus() !== 'off'"
 			(click)="store.refresh()"
 		>
 			<lucide-icon name="refresh-cw" />
 		</button>
+		<a class="button-secondary" [routerLink]="queryLink()">
+			<lucide-icon name="search" />
+			Query
+		</a>
+		<a class="button-secondary" [routerLink]="exportLink()">
+			<lucide-icon name="download" />
+			Export
+		</a>
+		<a class="button-secondary" [routerLink]="importLink()">
+			<lucide-icon name="upload" />
+			Import
+		</a>
+		<a class="button-secondary" [routerLink]="bulkUpdateLink()" title="Change fields of every document">
+			<lucide-icon name="pencil-line" />
+			Bulk update
+		</a>
+		<a class="icon-button" [routerLink]="copyLink()" aria-label="Copy or move collection" title="Copy or move collection">
+			<lucide-icon name="folder-input" />
+		</a>
+		<a class="icon-button" [routerLink]="renameLink()" aria-label="Rename collection" title="Rename collection">
+			<lucide-icon name="text-cursor-input" />
+		</a>
+		<a class="icon-button" [routerLink]="deleteLink()" aria-label="Delete collection" title="Delete collection">
+			<lucide-icon name="trash-2" />
+		</a>
 		<a class="button-primary" [routerLink]="addDocumentLink()">
 			<lucide-icon name="plus" />
 			Add document
 		</a>
 	</div>
 </div>
+@if (store.liveError(); as message) {
+	<p class="form-error live-error" role="alert">Live stopped: {{ message }}</p>
+}
 <section class="collection-body" aria-live="polite">
 	@switch (store.status()) {
 		@case ("loading") {
@@ -47,50 +74,31 @@
 					<app-empty-state icon="file-text" heading="No documents" text="This collection has no documents. Add one to start it." />
 				</div>
 			} @else {
-				@switch (view()) {
-					@case ("table") {
-						<app-collection-table
-							[documents]="store.documents()"
-							[fieldNames]="store.fieldNames()"
-							[database]="database()"
-							(documentSelected)="openDocument($event)"
-						/>
-					}
-					@case ("tree") {
-						<ul class="document-tree">
-							@for (document of store.documents(); track document.path) {
-								<li>
-									<details class="document-branch">
-										<summary class="document-row">
-											<lucide-icon class="disclosure" name="chevron-right" />
-											<lucide-icon name="file-text" />
-											<span class="document-id">{{ document.id }}</span>
-											@let fields = fieldsOf(document);
-											<app-value-cell [value]="fields" [database]="database()" />
-										</summary>
-										<app-value-tree [value]="fields" [database]="database()" />
-									</details>
-								</li>
-							}
-						</ul>
-					}
-					@case ("json") {
-						<pre class="json-view">{{ json() }}</pre>
-					}
-				}
+				<app-document-views
+					[documents]="store.documents()"
+					[database]="database()"
+					[view]="view()"
+					[changedPaths]="store.changedPaths()"
+				/>
 			}
 		}
 	}
 </section>
 @if (store.status() === "loaded" && store.documents().length > 0) {
 	<footer class="page-footer">
+		@if (store.liveStatus() === "on") {
+			<span class="live-status" role="status">
+				<span class="live-dot" aria-hidden="true"></span>
+				Live
+			</span>
+		}
 		<span class="document-total">
 			{{ store.documents().length }} {{ store.documents().length === 1 ? "document" : "documents" }} loaded{{ store.hasMore() ? ", more available" : "" }}
 		</span>
 		@if (store.loadMoreError(); as message) {
 			<span class="footer-error" role="alert">{{ message }}</span>
 		}
-		@if (store.hasMore()) {
+		@if (store.hasMore() && store.liveStatus() === "off") {
 			<button type="button" class="button-secondary" [disabled]="store.isLoadingMore()" (click)="store.loadMore()">
 				{{ store.isLoadingMore() ? "Loading…" : "Load more" }}
 			</button>

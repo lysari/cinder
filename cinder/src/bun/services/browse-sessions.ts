@@ -7,7 +7,9 @@ import type {
 	BrowseResponse,
 	BrowseResponseMessage,
 	BrowseSessionStartMessage,
+	BrowseWorkerMessage,
 } from "../../shared/interfaces/browse.interface";
+import type { LiveQueryParams, LiveUpdate } from "../../shared/interfaces/live.interface";
 import { resolveDatabaseSettings } from "./database-settings";
 
 export const BROWSE_REQUEST_TIMEOUT_MS = 30_000;
@@ -19,6 +21,7 @@ interface BrowseSessionsOptions {
 	idleTimeoutMs: number;
 	findAccount: (accountId: string) => Account | undefined;
 	onSessionEnd: (target: DatabaseTarget, reason: string) => void;
+	onLiveUpdate: (update: LiveUpdate) => void;
 }
 
 interface PendingRequest {
@@ -38,24 +41,38 @@ interface BrowseSession {
 
 export class BrowseSessions {
 	private readonly sessions = new Map<string, BrowseSession>();
+	private readonly listenerSessions = new Map<string, BrowseSession>();
 	private nextRequestId = 1;
 
 	constructor(private readonly options: BrowseSessionsOptions) {}
 
 	async request<T extends BrowseOperation>(operation: T): Promise<BrowseResponse<T>> {
-		const session = this.sessionFor(operation.params.database);
-		const requestId = this.nextRequestId++;
-		return new Promise<BrowseResponse<T>>((resolve, reject) => {
-			const timer = setTimeout(() => {
-				session.pendingRequests.delete(requestId);
-				this.scheduleIdleClose(session);
-				reject(new Error(`Firestore did not answer within ${this.options.requestTimeoutMs / 1000} seconds.`));
-			}, this.options.requestTimeoutMs);
-			session.pendingRequests.set(requestId, { resolve: resolve as (result: unknown) => void, reject, timer });
-			this.clearIdleTimer(session);
-			const message: BrowseRequestMessage = { requestId, operation };
-			session.worker.send(message);
-		});
+		return this.requestIn(this.sessionFor(operation.params.database), operation);
+	}
+
+	async startLive(params: LiveQueryParams): Promise<void> {
+		if (this.listenerSessions.has(params.listenerId)) {
+			throw new Error("This live view is already running.");
+		}
+		const session = this.sessionFor(params.database);
+		this.listenerSessions.set(params.listenerId, session);
+		try {
+			await this.requestIn(session, { type: "listen", params });
+		} catch (error) {
+			this.listenerSessions.delete(params.listenerId);
+			throw error;
+		}
+	}
+
+	async stopLive(listenerId: string): Promise<void> {
+		const session = this.listenerSessions.get(listenerId);
+		if (!session) {
+			return;
+		}
+		this.listenerSessions.delete(listenerId);
+		if (session.closeReason === null) {
+			await this.requestIn(session, { type: "unlisten", params: { database: session.target, listenerId } });
+		}
 	}
 
 	closeAccount(accountId: string): void {
@@ -72,6 +89,21 @@ export class BrowseSessions {
 		}
 	}
 
+	private requestIn<T extends BrowseOperation>(session: BrowseSession, operation: T): Promise<BrowseResponse<T>> {
+		const requestId = this.nextRequestId++;
+		return new Promise<BrowseResponse<T>>((resolve, reject) => {
+			const timer = setTimeout(() => {
+				session.pendingRequests.delete(requestId);
+				this.scheduleIdleClose(session);
+				reject(new Error(`Firestore did not answer within ${this.options.requestTimeoutMs / 1000} seconds.`));
+			}, this.options.requestTimeoutMs);
+			session.pendingRequests.set(requestId, { resolve: resolve as (result: unknown) => void, reject, timer });
+			this.clearIdleTimer(session);
+			const message: BrowseRequestMessage = { requestId, operation };
+			session.worker.send(message);
+		});
+	}
+
 	private sessionFor(target: DatabaseTarget): BrowseSession {
 		const key = sessionKey(target);
 		const existingSession = this.sessions.get(key);
@@ -83,7 +115,8 @@ export class BrowseSessions {
 			throw new Error(`Account ${target.accountId} was not found.`);
 		}
 		const worker = Bun.spawn([process.execPath, this.options.workerPath, BROWSE_SESSION_ARGUMENT], {
-			ipc: (message: BrowseResponseMessage) => this.handleResponse(session, message),
+			ipc: (message: BrowseWorkerMessage) =>
+				"requestId" in message ? this.handleResponse(session, message) : this.handleLiveUpdate(session, message),
 			serialization: "json",
 			stdio: ["ignore", "inherit", "inherit"],
 		});
@@ -110,6 +143,16 @@ export class BrowseSessions {
 		this.scheduleIdleClose(session);
 	}
 
+	private handleLiveUpdate(session: BrowseSession, update: LiveUpdate): void {
+		if (this.listenerSessions.get(update.listenerId) !== session) {
+			return;
+		}
+		if (update.kind === "stopped") {
+			this.listenerSessions.delete(update.listenerId);
+		}
+		this.options.onLiveUpdate(update);
+	}
+
 	private handleExit(session: BrowseSession): void {
 		if (this.sessions.get(session.key) === session) {
 			this.sessions.delete(session.key);
@@ -121,6 +164,12 @@ export class BrowseSessions {
 			pendingRequest.reject(new Error(`The browse session stopped because ${reason}. Try again.`));
 		}
 		session.pendingRequests.clear();
+		for (const [listenerId, listenerSession] of this.listenerSessions) {
+			if (listenerSession === session) {
+				this.listenerSessions.delete(listenerId);
+				this.options.onLiveUpdate({ listenerId, kind: "stopped", reason: `The browse session stopped because ${reason}.` });
+			}
+		}
 		this.options.onSessionEnd(session.target, reason);
 	}
 

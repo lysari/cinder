@@ -19,9 +19,15 @@
 	--icon-stroke: 1.75;
 	--sidebar-width: 256px;
 	--content-width: 640px;
+	--content-width-wide: 960px;
+	--progress-height: 6px;
+	--task-log-height: 240px;
 	--pane-header-height: 36px;
 	--toolbar-height: 40px;
 	--statusbar-height: 24px;
 	--opacity-disabled: 0.45;
 	--transition-fast: 120ms ease;
+	--shadow-overlay: 0 12px 32px var(--shadow);
+	--live-highlight-duration: 1500ms;
+	--live-dot-size: 8px;
 }

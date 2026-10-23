@@ -1,0 +1,130 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()">
+	<p class="analysis-summary">
+		{{ analysis().rowCount }} {{ analysis().rowCount === 1 ? "row" : "rows" }}, {{ analysis().columns.length }} columns,
+		{{ delimiterNames[analysis().delimiter] }}-separated{{ analysis().hasQuotedFields ? ", with quoted fields" : "" }}
+	</p>
+	<div class="field">
+		<label class="field-label" for="csv-collection-path">Collection path</label>
+		<input id="csv-collection-path" class="text-input" formControlName="collectionPath" autocomplete="off" spellcheck="false" />
+		@if (form.controls.collectionPath.touched && form.controls.collectionPath.invalid) {
+			<p class="field-error">Enter a collection path, such as users or users/dara/orders.</p>
+		}
+	</div>
+	<div class="field">
+		<label class="field-label" for="csv-id-column">Document ids</label>
+		<select id="csv-id-column" class="text-input" formControlName="idColumn">
+			<option value="">Generated ids</option>
+			@for (column of analysis().columns; track column.index) {
+				<option [value]="'' + column.index">From column {{ column.name }}</option>
+			}
+		</select>
+	</div>
+	<div class="field">
+		<label class="field-label" for="csv-time-zone">Time zone</label>
+		<select id="csv-time-zone" class="text-input" formControlName="timeZone">
+			@for (zone of timeZones; track zone) {
+				<option [value]="zone">{{ zone }}{{ zone === localTimeZone ? " (this computer)" : "" }}</option>
+			}
+		</select>
+		<p class="field-hint">Dates and times without Z or an offset are read in this time zone.</p>
+	</div>
+	<fieldset class="field">
+		<legend class="field-label">Columns</legend>
+		<p class="field-hint">Name nested fields with dots, e.g. address.city. Empty cells become null; a quoted empty cell in a string column stays an empty string.</p>
+		<div class="table-scroll">
+			<table class="mapping-table" formArrayName="columns">
+				<thead>
+					<tr>
+						<th scope="col">Include</th>
+						<th scope="col">CSV column</th>
+						<th scope="col">Field name</th>
+						<th scope="col">Type</th>
+						<th scope="col">Sample values</th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (group of form.controls.columns.controls; track $index; let index = $index) {
+						<tr [formGroupName]="index">
+							<td>
+								<input type="checkbox" formControlName="isIncluded" [attr.aria-label]="'Include column ' + columnName(index)" />
+							</td>
+							<td class="column-name">{{ columnName(index) }}</td>
+							<td>
+								<input class="text-input" formControlName="fieldName" [attr.aria-label]="'Field name for ' + columnName(index)" spellcheck="false" />
+								@if (group.errors?.["fieldName"]) {
+									<p class="field-error">Use valid field names joined by dots.</p>
+								}
+							</td>
+							<td>
+								<select class="text-input" formControlName="type" [attr.aria-label]="'Type of ' + columnName(index)">
+									<option value="string">string</option>
+									<option value="integer">integer</option>
+									<option value="double">double</option>
+									<option value="boolean">boolean</option>
+									<option value="timestamp">timestamp</option>
+									<option value="json">JSON (array or map)</option>
+									<option value="null">null</option>
+								</select>
+							</td>
+							<td class="sample-values">{{ sampleText(index) }}</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</fieldset>
+	<section class="field" aria-labelledby="csv-preview-title">
+		<h2 id="csv-preview-title" class="field-label">Preview</h2>
+		<div class="table-scroll">
+			<table class="preview-table">
+				<thead>
+					<tr>
+						@for (column of analysis().columns; track column.index) {
+							<th scope="col">{{ column.name }}</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					@for (row of analysis().previewRows; track $index) {
+						<tr>
+							@for (column of analysis().columns; track column.index) {
+								<td [class.is-empty]="row[column.index] === null || row[column.index] === undefined">{{ row[column.index] ?? "" }}</td>
+							}
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</section>
+	<fieldset class="field">
+		<legend class="field-label">Existing documents</legend>
+		<label class="choice">
+			<input type="radio" formControlName="writeMode" value="overwrite" />
+			<span class="choice-text">
+				<span class="choice-title">Overwrite</span>
+				<span class="field-hint">Replace each existing document with the row.</span>
+			</span>
+		</label>
+		<label class="choice">
+			<input type="radio" formControlName="writeMode" value="merge" />
+			<span class="choice-text">
+				<span class="choice-title">Merge</span>
+				<span class="field-hint">Write the row's fields into existing documents and keep their other fields.</span>
+			</span>
+		</label>
+		<label class="choice">
+			<input type="radio" formControlName="writeMode" value="skip" />
+			<span class="choice-text">
+				<span class="choice-title">Skip</span>
+				<span class="field-hint">Leave existing documents unchanged and only create new ones.</span>
+			</span>
+		</label>
+	</fieldset>
+	<p class="field-hint">Rows that fail are listed with their row number (the header is row 1). Canceling stops the load; documents already written stay.</p>
+	<div class="form-actions">
+		<button type="submit" class="button-primary" [disabled]="isPending()">
+			<lucide-icon name="upload" />
+			{{ isPending() ? "Starting…" : "Start load" }}
+		</button>
+	</div>
+</form>

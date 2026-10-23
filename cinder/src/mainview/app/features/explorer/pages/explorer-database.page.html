@@ -10,6 +10,10 @@
 	>
 		<lucide-icon name="refresh-cw" />
 	</button>
+	<a class="button-secondary import-link" [routerLink]="importLink()">
+		<lucide-icon name="upload" />
+		Import
+	</a>
 </header>
 <section class="database-body">
 	@let collectionIds = rootCollections();

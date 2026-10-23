@@ -1,0 +1,94 @@
+@let current = task();
+<article class="task" [class.is-highlighted]="isHighlighted()" [attr.aria-label]="current.description">
+	<header class="task-header">
+		<span class="task-status" [class]="'is-' + current.status">{{ statusLabels[current.status] }}</span>
+		<h2 class="task-title">{{ current.description }}</h2>
+		<time class="task-time" [attr.datetime]="current.startedAt | date: 'yyyy-MM-ddTHH:mm:ss'">
+			{{ current.startedAt | date: "HH:mm:ss" }}{{ current.endedAt ? " – " + (current.endedAt | date: "HH:mm:ss") : "" }}
+		</time>
+		@if (isActive()) {
+			<button
+				type="button"
+				class="button-secondary"
+				[title]="cancelNote() ? 'Stop the task; ' + cancelNote() : 'Stop the task'"
+				(click)="cancelRequested.emit()"
+			>
+				<lucide-icon name="square" />
+				Cancel
+			</button>
+		}
+	</header>
+	@if (progressRatio() !== null) {
+		<progress class="task-progress" [value]="progressRatio()" max="1" [attr.aria-label]="current.description + ' progress'"></progress>
+	} @else if (isActive()) {
+		<progress class="task-progress" [attr.aria-label]="current.description + ' progress'"></progress>
+	}
+	@if (counts(); as text) {
+		<p class="task-counts">{{ text }}</p>
+	}
+	@if (current.status === "canceled" && cancelNote(); as note) {
+		<p class="task-note">Canceled; {{ note }}</p>
+	}
+	@if (current.error; as message) {
+		<p class="task-error" role="alert">{{ message }}</p>
+	}
+	@if (current.result; as result) {
+		@switch (result.kind) {
+			@case ("export") {
+				<p class="task-result">
+					Saved <code>{{ result.filePath }}</code> with {{ result.documentCount }} documents ({{ formatBytes(result.byteCount) }}).
+				</p>
+			}
+			@case ("writes") {
+				<p class="task-result">{{ writeSummary() }}</p>
+				@if (result.failures.length > 0) {
+					<div class="failure-scroll">
+						<table class="failure-table">
+							<thead>
+								<tr>
+									<th scope="col">Row</th>
+									<th scope="col">Document</th>
+									<th scope="col">Reason</th>
+								</tr>
+							</thead>
+							<tbody>
+								@for (failure of result.failures; track $index) {
+									<tr>
+										<td>{{ failure.rowNumber ?? "—" }}</td>
+										<td><code>{{ failure.documentPath ?? "—" }}</code></td>
+										<td>{{ failure.message }}</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+					@if (hiddenFailureCount() > 0) {
+						<p class="task-note">{{ hiddenFailureCount() }} more failures are not listed.</p>
+					}
+				}
+			}
+			@case ("csv-analysis") {
+				<p class="task-result">{{ result.rowCount }} rows in {{ result.columns.length }} columns.</p>
+			}
+			@case ("bulk-update-preview") {
+				<p class="task-result">{{ result.documents.length }} documents previewed; nothing was written.</p>
+			}
+		}
+	}
+	@if (current.logEntries.length > 0) {
+		<button type="button" class="log-toggle" [attr.aria-expanded]="isLogOpen()" (click)="isLogOpen.set(!isLogOpen())">
+			<lucide-icon [name]="isLogOpen() ? 'chevron-down' : 'chevron-right'" />
+			Log ({{ current.logEntries.length }})
+		</button>
+		@if (isLogOpen()) {
+			<ol class="task-log">
+				@for (entry of current.logEntries; track $index) {
+					<li class="log-line" [class]="'is-' + entry.level">
+						<time class="log-time" [attr.datetime]="entry.time">{{ entry.time | date: "HH:mm:ss.SSS" }}</time>
+						<span class="log-message">{{ entry.message }}</span>
+					</li>
+				}
+			</ol>
+		}
+	}
+</article>

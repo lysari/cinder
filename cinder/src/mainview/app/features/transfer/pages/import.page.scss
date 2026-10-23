@@ -1,0 +1,51 @@
+:host {
+	display: block;
+}
+
+.transfer-page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-7);
+	max-width: var(--content-width-wide);
+	padding: var(--space-8);
+
+	.page-header {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+
+		.page-title {
+			font-size: var(--font-size-lg);
+			font-weight: var(--font-weight-semibold);
+		}
+	}
+
+	.page-text {
+		color: var(--text-secondary);
+		line-height: var(--line-height-text);
+	}
+
+	.file-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-5);
+
+		.file-summary {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: var(--space-4);
+			min-width: 0;
+
+			.file-name {
+				font-weight: var(--font-weight-medium);
+				user-select: text;
+			}
+
+			.file-detail {
+				color: var(--text-secondary);
+			}
+		}
+	}
+}

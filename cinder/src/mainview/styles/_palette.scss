@@ -14,6 +14,8 @@
 	--graphite-800: #2d2b29;
 	--graphite-900: #1d1c1b;
 	--graphite-950: #161514;
+	--graphite-950-shadow: rgb(22 21 20 / 0.24);
+	--graphite-950-backdrop: rgb(22 21 20 / 0.4);
 	--ember-50: #fff4ed;
 	--ember-100: #ffe3d1;
 	--ember-300: #ffa66f;
@@ -36,6 +38,10 @@
 	--violet-700: #6b3fa0;
 	--teal-300: #7fcfcf;
 	--teal-700: #1d6b6b;
+	--amber-50: #fdf6e3;
+	--amber-300: #f0c36d;
+	--amber-700: #8a5a00;
+	--amber-900: #3a2a05;
 
 	--bg-app: var(--graphite-25);
 	--bg-sidebar: var(--graphite-50);
@@ -67,6 +73,22 @@
 	--value-reference: var(--ember-600);
 	--value-null: var(--graphite-500);
 	--bg-table-header: var(--graphite-50);
+	--text-success: var(--green-700);
+	--text-warning: var(--amber-700);
+	--warning-subtle: var(--amber-50);
+	--text-info: var(--blue-700);
+	--code-keyword: var(--violet-700);
+	--code-string: var(--green-700);
+	--code-number: var(--blue-700);
+	--code-comment: var(--graphite-500);
+	--code-function: var(--teal-700);
+	--code-selection: var(--ember-100);
+	--code-active-line: var(--graphite-50);
+	--code-bracket-match: var(--ember-100);
+	--bg-changed: var(--ember-100);
+	--bg-backdrop: var(--graphite-950-backdrop);
+	--shadow: var(--graphite-950-shadow);
+	--text-live: var(--green-700);
 
 	@media (prefers-color-scheme: dark) {
 		--bg-app: var(--graphite-900);
@@ -93,5 +115,19 @@
 		--value-reference: var(--ember-300);
 		--value-null: var(--graphite-400);
 		--bg-table-header: var(--graphite-950);
+		--text-success: var(--green-300);
+		--text-warning: var(--amber-300);
+		--warning-subtle: var(--amber-900);
+		--text-info: var(--blue-300);
+		--code-keyword: var(--violet-300);
+		--code-string: var(--green-300);
+		--code-number: var(--blue-300);
+		--code-comment: var(--graphite-400);
+		--code-function: var(--teal-300);
+		--code-selection: var(--ember-900);
+		--code-active-line: var(--graphite-900);
+		--code-bracket-match: var(--ember-700);
+		--bg-changed: var(--ember-900);
+		--text-live: var(--green-300);
 	}
 }
