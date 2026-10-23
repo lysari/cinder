@@ -1,4 +1,4 @@
-# src/mainview/app/shared/components/value-editor.component.ts
+# src/mainview/app/shared/components/value-editor/value-editor.component.ts
 
 One recursive component edits any `ValueDraft`; with `isRoot` it edits a document's fields (the root map) without a type select of its own.
 

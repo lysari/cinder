@@ -1,4 +1,4 @@
-# src/mainview/app/shared/components/code-editor.component.ts
+# src/mainview/app/shared/components/code-editor/code-editor.component.ts
 
 A JavaScript editor on CodeMirror 6 (`codemirror` `basicSetup`: line numbers, bracket matching, autocompletion, search, history).
 

@@ -9,11 +9,11 @@ export const queryRoutes: Routes = [
 		children: [
 			{
 				path: "",
-				loadComponent: () => import("./pages/query.page").then((m) => m.QueryPage),
+				loadComponent: () => import("./pages/query/query.page").then((m) => m.QueryPage),
 			},
 			{
 				path: "c/:collectionPath",
-				loadComponent: () => import("./pages/query.page").then((m) => m.QueryPage),
+				loadComponent: () => import("./pages/query/query.page").then((m) => m.QueryPage),
 			},
 		],
 	},

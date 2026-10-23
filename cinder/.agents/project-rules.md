@@ -30,11 +30,13 @@ cinder/
 │           ├── features/
 │           │   └── <feature>/          # connections, explorer, query, transfer, tasks
 │           │       ├── components/
+│           │       │   └── <name>/     # <name>.component.{ts,html,scss}
 │           │       ├── pages/
+│           │       │   └── <name>/     # <name>.page.{ts,html,scss}
 │           │       ├── services/
 │           │       ├── stores/
 │           │       └── <feature>.routes.ts
-│           ├── shared/                 # layout/, components/, pipes/, utils/ (no domain state)
+│           ├── shared/                 # layout/, components/<name>/, pipes/, utils/ (no domain state)
 │           ├── app.component.ts        # Mounts the router only
 │           ├── app.config.ts
 │           └── app.routes.ts
@@ -90,4 +92,5 @@ cinder/
 - Code editor: CodeMirror 6, answered 2026-10-23
 - Value encoder location: `src/worker/utils/` because it needs SDK classes (deviation from `src/shared/utils/` approved by the orchestrator), answered 2026-10-23
 - Icons: Lucide, answered 2026-10-23
+- Component and page folders: each component and page lives in its own folder named after it (`components/<name>/<name>.component.{ts,html,scss}`, `pages/<name>/<name>.page.{ts,html,scss}`), following `frameworks/angular/rules.md` → "Directory structure", answered 2026-10-24
 - Clean-room: no code, names, assets, or OAuth client copied from the reverse-engineered app; only `../analysis/REPORT.md` informs the architecture, answered 2026-10-23

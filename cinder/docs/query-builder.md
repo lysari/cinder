@@ -1,4 +1,4 @@
-# src/mainview/app/features/query/components/query-builder.component.ts
+# src/mainview/app/features/query/components/query-builder/query-builder.component.ts
 
 The builder owns a typed `FormGroup` (filters and orders are `FormArray`s the user adds to and removes from) but takes its values from the `value` input and reports every change with `valueChange`, so the page can store them.
 
