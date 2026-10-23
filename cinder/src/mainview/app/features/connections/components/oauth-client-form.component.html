@@ -1,0 +1,29 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()">
+	<div class="field">
+		<label class="field-label" for="oauth-client-id">Client ID</label>
+		<input
+			id="oauth-client-id"
+			class="text-input"
+			formControlName="clientId"
+			placeholder="1234567890-abc.apps.googleusercontent.com"
+			autocomplete="off"
+			spellcheck="false"
+		/>
+		@if (form.controls.clientId.touched && form.controls.clientId.invalid) {
+			<p class="field-error">Paste the client ID. It ends with .apps.googleusercontent.com.</p>
+		}
+	</div>
+	<div class="field">
+		<label class="field-label" for="oauth-client-secret">Client secret</label>
+		<input id="oauth-client-secret" class="text-input" type="password" formControlName="clientSecret" autocomplete="off" />
+		@if (form.controls.clientSecret.touched && form.controls.clientSecret.invalid) {
+			<p class="field-error">Paste the client secret of the same OAuth client.</p>
+		}
+	</div>
+	<div class="form-actions">
+		<button type="submit" class="button-primary" [disabled]="isPending()">Save OAuth client</button>
+		@if (canCancel()) {
+			<button type="button" class="button-secondary" (click)="canceled.emit()">Cancel</button>
+		}
+	</div>
+</form>

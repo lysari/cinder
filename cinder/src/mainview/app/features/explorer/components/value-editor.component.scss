@@ -1,0 +1,128 @@
+:host {
+	--value-editor-type-width: 112px;
+	--value-editor-name-width: 160px;
+	--value-editor-indent: var(--space-6);
+
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	min-width: 0;
+}
+
+.value-row {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-4);
+	min-width: 0;
+
+	.type-select,
+	.boolean-select {
+		height: var(--control-height-lg);
+		padding: 0 var(--space-4);
+		border: var(--border-width) solid var(--border-strong);
+		border-radius: var(--radius-md);
+		background: var(--bg-input);
+	}
+
+	.type-select {
+		flex-shrink: 0;
+		width: var(--value-editor-type-width);
+	}
+
+	.value-input {
+		flex: 1;
+		min-width: 0;
+	}
+
+	textarea.value-input {
+		height: auto;
+		padding: var(--space-3) var(--space-4);
+		font-family: var(--font-mono);
+		line-height: var(--line-height-text);
+		resize: vertical;
+	}
+
+	input.value-input {
+		font-family: var(--font-mono);
+	}
+
+	.is-invalid {
+		border-color: var(--danger);
+	}
+
+	.value-note {
+		align-self: center;
+		color: var(--text-muted);
+		font-family: var(--font-mono);
+	}
+}
+
+.children {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	margin-left: calc(var(--value-editor-indent) - var(--value-editor-name-width) - var(--space-4));
+	padding-left: var(--value-editor-indent);
+	border-left: var(--border-width) solid var(--border);
+
+	&.is-root {
+		margin-left: 0;
+		padding-left: 0;
+		border-left: 0;
+	}
+
+	.add-button {
+		align-self: flex-start;
+	}
+
+	.entries {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		padding: 0;
+		list-style: none;
+
+		.entry {
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-3);
+
+			.entry-head {
+				display: flex;
+				align-items: flex-start;
+				gap: var(--space-4);
+
+				.name-input {
+					flex-shrink: 0;
+					width: var(--value-editor-name-width);
+					font-family: var(--font-mono);
+
+					&.is-invalid {
+						border-color: var(--danger);
+					}
+				}
+
+				.item-index {
+					flex-shrink: 0;
+					align-self: center;
+					width: var(--value-editor-name-width);
+					color: var(--text-secondary);
+					font-family: var(--font-mono);
+				}
+
+				.entry-value {
+					flex: 1;
+				}
+
+				.icon-button {
+					margin-top: calc((var(--control-height-lg) - var(--control-height)) / 2);
+				}
+			}
+		}
+
+		.entries-empty {
+			color: var(--text-muted);
+			font-style: italic;
+		}
+	}
+}

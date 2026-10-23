@@ -1,0 +1,120 @@
+:host {
+	display: block;
+}
+
+.add-account {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-7);
+	max-width: var(--content-width);
+	padding: var(--space-8);
+
+	.page-header {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+
+		.page-title {
+			font-size: var(--font-size-lg);
+			font-weight: var(--font-weight-semibold);
+		}
+
+		.page-text {
+			color: var(--text-secondary);
+			line-height: var(--line-height-text);
+		}
+	}
+
+	.account-types {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-4);
+
+		.account-type {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-2);
+			padding: var(--space-5);
+			border: var(--border-width) solid var(--border);
+			border-radius: var(--radius-md);
+			background: var(--bg-input);
+			text-align: left;
+			cursor: pointer;
+			transition: border-color var(--transition-fast);
+
+			lucide-icon {
+				margin-bottom: var(--space-3);
+				color: var(--text-secondary);
+			}
+
+			.account-type-name {
+				font-weight: var(--font-weight-medium);
+			}
+
+			.account-type-text {
+				color: var(--text-secondary);
+				font-size: var(--font-size-sm);
+			}
+
+			&:hover {
+				border-color: var(--border-strong);
+			}
+
+			&.is-selected {
+				border-color: var(--accent);
+				background: var(--accent-subtle);
+
+				lucide-icon {
+					color: var(--accent-strong);
+				}
+			}
+		}
+	}
+
+	.account-type-panel {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-6);
+
+		.panel-title {
+			font-size: var(--font-size-md);
+			font-weight: var(--font-weight-semibold);
+		}
+
+		.panel-text {
+			color: var(--text-secondary);
+			line-height: var(--line-height-text);
+		}
+
+		.steps {
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-3);
+			padding-left: var(--space-7);
+			line-height: var(--line-height-text);
+			user-select: text;
+		}
+
+		.saved-client {
+			display: flex;
+			align-items: center;
+			gap: var(--space-4);
+			min-width: 0;
+
+			.saved-client-label {
+				font-weight: var(--font-weight-medium);
+			}
+
+			.saved-client-id {
+				flex: 1;
+				min-width: 0;
+				overflow: hidden;
+				color: var(--text-secondary);
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				user-select: text;
+			}
+		}
+	}
+}

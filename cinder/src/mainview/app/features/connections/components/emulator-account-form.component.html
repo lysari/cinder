@@ -1,0 +1,55 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()">
+	<div class="field">
+		<label class="field-label" for="emulator-host">Host</label>
+		<input id="emulator-host" class="text-input" formControlName="host" autocomplete="off" spellcheck="false" />
+		@if (form.controls.host.touched && form.controls.host.invalid) {
+			<p class="field-error">Enter a host name or IPv4 address, such as 127.0.0.1.</p>
+		}
+	</div>
+	<div class="field">
+		<label class="field-label" for="emulator-port">Port</label>
+		<input id="emulator-port" class="text-input port-input" type="number" formControlName="port" min="1" max="65535" />
+		@if (form.controls.port.touched && form.controls.port.invalid) {
+			<p class="field-error">Enter a whole number from 1 to 65535.</p>
+		}
+	</div>
+	<fieldset class="field" formArrayName="projectIds">
+		<legend class="field-label">Project ids</legend>
+		<p class="field-hint">The emulator cannot list its projects, so name each project you use, such as demo-cinder.</p>
+		@for (control of form.controls.projectIds.controls; track control; let index = $index) {
+			<div class="project-id-row">
+				<input
+					class="text-input"
+					[formControlName]="index"
+					[attr.aria-label]="'Project id ' + (index + 1)"
+					autocomplete="off"
+					spellcheck="false"
+				/>
+				@if (form.controls.projectIds.length > 1) {
+					<button
+						type="button"
+						class="icon-button"
+						aria-label="Remove project id"
+						title="Remove project id"
+						(click)="removeProjectId(index)"
+					>
+						<lucide-icon name="x" />
+					</button>
+				}
+			</div>
+			@if (control.touched && control.invalid) {
+				<p class="field-error">Use lowercase letters, digits and hyphens.</p>
+			}
+		}
+		<button type="button" class="button-secondary add-project-button" (click)="addProjectId()">
+			<lucide-icon name="plus" />
+			Add project id
+		</button>
+	</fieldset>
+	@if (error(); as message) {
+		<p class="form-error" role="alert">{{ message }}</p>
+	}
+	<div class="form-actions">
+		<button type="submit" class="button-primary" [disabled]="isPending()">Add emulator account</button>
+	</div>
+</form>

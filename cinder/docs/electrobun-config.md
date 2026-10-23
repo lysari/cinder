@@ -1,0 +1,11 @@
+# electrobun.config.ts
+
+## Worker packaging
+
+Electrobun bundles only the main entry (`src/bun/index.ts`), so the task worker is bundled separately:
+
+1. `bun run build:worker` bundles `src/worker/index.ts` with its dependencies (the Firestore SDK, gRPC and their proto files) into `dist/worker.js` with `bun build --target=bun`. `dev` and `build` run it after `build:view`, because Vite empties `dist/` first.
+2. `build.copy` places it at `Resources/app/bun/worker.js`, next to the main bundle.
+3. `src/bun/index.ts` resolves the path through `PATHS.RESOURCES_FOLDER`, not `import.meta.dir`: the launcher runs the main bundle in a Bun `Worker` thread and, for ASAR builds, from a copy in the temp directory.
+
+The packaged app ships no `node_modules`; the bundle must stay self-contained. Tests run `src/worker/index.ts` from source instead.

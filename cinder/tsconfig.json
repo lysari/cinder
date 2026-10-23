@@ -1,0 +1,22 @@
+{
+	"extends": "./.hutch/devkit/tsconfig.json",
+	"compilerOptions": {
+		"target": "ES2022",
+		"useDefineForClassFields": false,
+		"module": "ESNext",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"moduleResolution": "bundler",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": false,
+		"skipLibCheck": true
+	},
+	"include": ["src", "tests", "electrobun.config.ts", "hutch.config.ts", "vite.config.ts"],
+	"exclude": ["node_modules", "dist", "build", "src/mainview"]
+}

@@ -1,0 +1,75 @@
+:host {
+	--collection-table-cell-max-width: 280px;
+	--collection-table-id-max-width: 220px;
+
+	display: block;
+}
+
+.collection-table {
+	min-width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+
+	th,
+	td {
+		max-width: var(--collection-table-cell-max-width);
+		height: var(--control-height);
+		padding: 0 var(--space-5);
+		border-bottom: var(--border-width) solid var(--border);
+		border-right: var(--border-width) solid var(--border);
+		overflow: hidden;
+		text-align: left;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	thead {
+		th {
+			position: sticky;
+			top: 0;
+			z-index: 1;
+			background: var(--bg-table-header);
+			color: var(--text-secondary);
+			font-family: var(--font-mono);
+			font-weight: var(--font-weight-medium);
+		}
+
+		.id-cell {
+			z-index: 2;
+			background: var(--bg-table-header);
+		}
+	}
+
+	.id-cell {
+		position: sticky;
+		left: 0;
+		max-width: var(--collection-table-id-max-width);
+		background: var(--bg-app);
+		font-weight: var(--font-weight-medium);
+
+		.id-link {
+			color: var(--text);
+			font-family: var(--font-mono);
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+
+	tbody tr {
+		cursor: pointer;
+
+		&:hover {
+			td,
+			.id-cell {
+				background: var(--bg-hover);
+			}
+		}
+	}
+
+	.missing-value {
+		color: var(--text-muted);
+	}
+}

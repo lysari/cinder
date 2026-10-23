@@ -1,0 +1,8 @@
+@if (referenceRoute(); as route) {
+	<a class="value is-reference" [routerLink]="route" [title]="summary()" (click)="$event.stopPropagation()">{{ summary() }}</a>
+} @else {
+	<span class="value" [class]="'is-' + value().type" [title]="title()">{{ summary() }}</span>
+}
+@if (numberHint(); as hint) {
+	<span class="number-hint">{{ hint }}</span>
+}

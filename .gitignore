@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Devbox environment
+.devbox/
+
+# Target binaries, downloads, and extracted bundles
+target/
+
+# Large REA raw analysis dumps & stderr logs
+analysis/rea-js-app.json
+analysis/*.stderr
+
+# Build & compilation outputs
+dist/
+**/dist/
+build/
+**/build/
+artifacts/
+**/artifacts/
+.cottontail-tmp/
+**/.cottontail-tmp/
+*.tsbuildinfo
+
+# Hutch / Electrobun state & toolchains
+.hutch/
+**/.hutch/
+.hutch-home/
+**/.hutch-home/
+
+# Logs
+*.log
+**/*.log
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# IDE & Editor files
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.swp
+*.swo
+*~

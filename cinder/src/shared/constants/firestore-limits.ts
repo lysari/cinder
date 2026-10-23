@@ -1,0 +1,11 @@
+export const MAX_ID_BYTES = 1500;
+export const MAX_VALUE_DEPTH = 20;
+export const MIN_INTEGER = -(2n ** 63n);
+export const MAX_INTEGER = 2n ** 63n - 1n;
+export const MIN_LATITUDE = -90;
+export const MAX_LATITUDE = 90;
+export const MIN_LONGITUDE = -180;
+export const MAX_LONGITUDE = 180;
+export const MIN_TIMESTAMP_SECONDS = -62135596800;
+export const MAX_TIMESTAMP_SECONDS = 253402300799;
+export const MAX_NANOS = 999_999_999;

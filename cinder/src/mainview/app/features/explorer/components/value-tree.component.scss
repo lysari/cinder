@@ -1,0 +1,68 @@
+:host {
+	--value-tree-indent: var(--space-7);
+
+	display: block;
+}
+
+.value-tree {
+	padding: 0 0 0 var(--value-tree-indent);
+	list-style: none;
+
+	.tree-row {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-4);
+		min-width: 0;
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-sm);
+		user-select: text;
+
+		&:hover {
+			background: var(--bg-hover);
+		}
+
+		&.is-leaf {
+			padding-left: calc(var(--space-3) + var(--icon-size-sm) + var(--space-4));
+		}
+
+		.disclosure {
+			--icon-size: var(--icon-size-sm);
+
+			align-self: center;
+			color: var(--text-muted);
+			transition: transform var(--transition-fast);
+		}
+
+		.field-name {
+			flex-shrink: 0;
+			font-family: var(--font-mono);
+		}
+
+		.type-label {
+			flex-shrink: 0;
+			color: var(--text-muted);
+			font-size: var(--font-size-xs);
+		}
+	}
+
+	.tree-branch {
+		summary {
+			list-style: none;
+			cursor: pointer;
+
+			&::-webkit-details-marker {
+				display: none;
+			}
+		}
+
+		&[open] > summary .disclosure {
+			transform: rotate(90deg);
+		}
+	}
+
+	.tree-empty {
+		padding: var(--space-2) var(--space-3);
+		color: var(--text-muted);
+		font-style: italic;
+	}
+}

@@ -1,0 +1,118 @@
+<section class="add-account">
+	<header class="page-header">
+		<h1 class="page-title">Add account</h1>
+		<p class="page-text">Choose how Cinder reaches Firestore. Keys and tokens are kept in the macOS keychain.</p>
+	</header>
+	<div class="account-types" role="group" aria-label="Account type">
+		<button
+			type="button"
+			class="account-type"
+			[attr.aria-pressed]="accountType() === 'emulator'"
+			[class.is-selected]="accountType() === 'emulator'"
+			(click)="selectAccountType('emulator')"
+		>
+			<lucide-icon name="server" />
+			<span class="account-type-name">Emulator</span>
+			<span class="account-type-text">A local Firestore emulator</span>
+		</button>
+		<button
+			type="button"
+			class="account-type"
+			[attr.aria-pressed]="accountType() === 'service-account'"
+			[class.is-selected]="accountType() === 'service-account'"
+			(click)="selectAccountType('service-account')"
+		>
+			<lucide-icon name="key-round" />
+			<span class="account-type-name">Service account</span>
+			<span class="account-type-text">A JSON key file</span>
+		</button>
+		<button
+			type="button"
+			class="account-type"
+			[attr.aria-pressed]="accountType() === 'google-user'"
+			[class.is-selected]="accountType() === 'google-user'"
+			(click)="selectAccountType('google-user')"
+		>
+			<lucide-icon name="user-round" />
+			<span class="account-type-name">Google account</span>
+			<span class="account-type-text">Sign in with your browser</span>
+		</button>
+	</div>
+	@switch (accountType()) {
+		@case ("emulator") {
+			<section class="account-type-panel" aria-labelledby="emulator-title">
+				<h2 id="emulator-title" class="panel-title">Emulator</h2>
+				<app-emulator-account-form [isPending]="isPending()" [error]="error()" (submitted)="addEmulatorAccount($event)" />
+			</section>
+		}
+		@case ("service-account") {
+			<section class="account-type-panel" aria-labelledby="service-account-title">
+				<h2 id="service-account-title" class="panel-title">Service account</h2>
+				<p class="panel-text">
+					Choose the JSON key of a service account. Cinder opens the project named in the key with the roles the service
+					account has there.
+				</p>
+				@if (error(); as message) {
+					<p class="form-error" role="alert">{{ message }}</p>
+				}
+				<div class="form-actions">
+					<button type="button" class="button-primary" [disabled]="isPending()" (click)="importServiceAccount()">
+						<lucide-icon name="file-key" />
+						Choose key file…
+					</button>
+				</div>
+			</section>
+		}
+		@case ("google-user") {
+			<section class="account-type-panel" aria-labelledby="google-title">
+				<h2 id="google-title" class="panel-title">Google account</h2>
+				<p class="panel-text">Cinder signs in through an OAuth client from your own Google Cloud project:</p>
+				<ol class="steps">
+					<li>
+						In the Google Cloud console, open <strong>APIs &amp; Services › Credentials</strong> and create an OAuth
+						client ID of type <strong>Desktop app</strong>.
+					</li>
+					<li>In the same project, enable the <strong>Cloud Firestore API</strong> and the <strong>Firebase Management API</strong>.</li>
+					<li>While the OAuth consent screen is in testing, add your Google account as a test user.</li>
+					<li>Paste the client ID and client secret here.</li>
+				</ol>
+				@let oauthClient = store.oauthClient();
+				@if (oauthClient.status === "loading") {
+					<p class="panel-text">Loading the saved OAuth client…</p>
+				} @else if (oauthClient.status === "failed") {
+					<p class="form-error" role="alert">{{ oauthClient.error }}</p>
+				} @else if (oauthClient.value && !isEditingOAuthClient()) {
+					<div class="saved-client">
+						<span class="saved-client-label">OAuth client</span>
+						<code class="saved-client-id">{{ oauthClient.value.clientId }}</code>
+						<button type="button" class="button-secondary" (click)="isEditingOAuthClient.set(true)">Change</button>
+					</div>
+					@if (error(); as message) {
+						<p class="form-error" role="alert">{{ message }}</p>
+					}
+					<div class="form-actions">
+						@if (store.isSigningIn()) {
+							<span class="panel-text" role="status">Finish signing in in your browser…</span>
+							<button type="button" class="button-secondary" (click)="cancelGoogleSignIn()">Cancel sign-in</button>
+						} @else {
+							<button type="button" class="button-primary" [disabled]="isPending()" (click)="signInWithGoogle()">
+								<lucide-icon name="log-in" />
+								Sign in with Google
+							</button>
+						}
+					</div>
+				} @else {
+					@if (error(); as message) {
+						<p class="form-error" role="alert">{{ message }}</p>
+					}
+					<app-oauth-client-form
+						[isPending]="isPending()"
+						[canCancel]="oauthClient.value !== null"
+						(saved)="saveOAuthClient($event)"
+						(canceled)="isEditingOAuthClient.set(false)"
+					/>
+				}
+			</section>
+		}
+	}
+</section>

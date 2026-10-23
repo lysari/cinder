@@ -1,0 +1,36 @@
+:host {
+	--empty-state-text-width: 360px;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--space-5);
+	text-align: center;
+}
+
+.empty-icon {
+	display: grid;
+	place-items: center;
+	padding: var(--space-5);
+	margin-bottom: var(--space-2);
+	border: var(--border-width) solid var(--accent-subtle-border);
+	border-radius: var(--radius-lg);
+	background: var(--accent-subtle);
+	color: var(--accent-strong);
+
+	lucide-icon {
+		--icon-size: var(--icon-size-lg);
+	}
+}
+
+.empty-title {
+	font-size: var(--font-size-lg);
+	font-weight: var(--font-weight-semibold);
+}
+
+.empty-text {
+	max-width: var(--empty-state-text-width);
+	margin-bottom: var(--space-3);
+	color: var(--text-secondary);
+	line-height: var(--line-height-text);
+}

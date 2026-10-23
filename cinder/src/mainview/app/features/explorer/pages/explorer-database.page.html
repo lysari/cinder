@@ -1,0 +1,37 @@
+<header class="database-header">
+	<app-explorer-breadcrumb [database]="database()" [accountLabel]="accountLabel()" />
+	<button
+		type="button"
+		class="icon-button"
+		aria-label="Refresh collections"
+		title="Refresh collections"
+		[disabled]="rootCollections()?.status === 'loading'"
+		(click)="collections.refreshRootCollections(database())"
+	>
+		<lucide-icon name="refresh-cw" />
+	</button>
+</header>
+<section class="database-body">
+	@let collectionIds = rootCollections();
+	@if (!collectionIds || collectionIds.status === "loading") {
+		<p class="body-status">Loading collections…</p>
+	} @else if (collectionIds.status === "failed") {
+		<p class="form-error" role="alert">{{ collectionIds.error }}</p>
+	} @else if (collectionIds.value.length === 0) {
+		<div class="body-empty">
+			<app-empty-state icon="layers" heading="No collections" text="This database has no collections yet." />
+		</div>
+	} @else {
+		<h1 class="section-title">Collections</h1>
+		<ul class="collection-list">
+			@for (collectionId of collectionIds.value; track collectionId) {
+				<li>
+					<a class="collection-link" [routerLink]="collectionLink(collectionId)">
+						<lucide-icon name="layers" />
+						{{ collectionId }}
+					</a>
+				</li>
+			}
+		</ul>
+	}
+</section>

@@ -1,0 +1,25 @@
+<ul class="value-tree">
+	@for (entry of entries(); track entry.label) {
+		<li>
+			@if (entry.children; as children) {
+				<details class="tree-branch">
+					<summary class="tree-row">
+						<lucide-icon class="disclosure" name="chevron-right" />
+						<span class="field-name">{{ entry.label }}</span>
+						<span class="type-label">{{ entry.value.type }}</span>
+						<app-value-cell [value]="entry.value" [database]="database()" />
+					</summary>
+					<app-value-tree [value]="children" [database]="database()" />
+				</details>
+			} @else {
+				<div class="tree-row is-leaf">
+					<span class="field-name">{{ entry.label }}</span>
+					<span class="type-label">{{ entry.value.type }}</span>
+					<app-value-cell [value]="entry.value" [database]="database()" />
+				</div>
+			}
+		</li>
+	} @empty {
+		<li class="tree-empty">empty</li>
+	}
+</ul>

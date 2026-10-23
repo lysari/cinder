@@ -1,0 +1,122 @@
+<header class="page-header">
+	<app-explorer-breadcrumb [database]="database()" [accountLabel]="accountLabel()" [path]="documentPath()" />
+</header>
+<div class="toolbar">
+	<div class="toolbar-actions">
+		<button type="button" class="icon-button" aria-label="Copy document path" title="Copy document path" (click)="copyPath()">
+			<lucide-icon [name]="copyState() === 'copied' ? 'check' : 'copy'" />
+		</button>
+		<button
+			type="button"
+			class="icon-button"
+			aria-label="Refresh"
+			title="Refresh (discards unsaved changes)"
+			[disabled]="store.document().status === 'loading' || store.isSaving()"
+			(click)="store.refresh()"
+		>
+			<lucide-icon name="refresh-cw" />
+		</button>
+		<span class="copy-status" role="status">
+			@if (copyState() === "copied") {
+				Path copied
+			} @else if (copyState() === "failed") {
+				Copying the path failed
+			}
+		</span>
+	</div>
+	@if (store.document().status === "loaded") {
+		<div class="toolbar-actions">
+			<button type="button" class="button-secondary" [disabled]="!store.isEdited() || store.isSaving()" (click)="store.revert()">
+				<lucide-icon name="undo-2" />
+				Revert
+			</button>
+			<button
+				type="button"
+				class="button-primary"
+				[disabled]="store.changes() === null || store.isSaving()"
+				(click)="store.save()"
+			>
+				<lucide-icon name="save" />
+				{{ store.isSaving() ? "Saving…" : "Save" }}
+			</button>
+			<button type="button" class="icon-button" aria-label="Delete document" title="Delete document" (click)="askToDelete()">
+				<lucide-icon name="trash-2" />
+			</button>
+		</div>
+	}
+</div>
+<section class="document-body">
+	@if (isConfirmingDelete()) {
+		<div class="delete-confirm" role="group" aria-label="Confirm deletion">
+			<p>Delete <code>{{ documentPath() }}</code>? This cannot be undone.</p>
+			<label class="recursive-option">
+				<input type="checkbox" [checked]="isRecursiveDelete()" (change)="setRecursiveDelete($event)" />
+				Also delete all of its subcollections and their documents
+			</label>
+			@if (!isRecursiveDelete()) {
+				<p class="field-hint">Without this, its subcollections stay and remain reachable by path.</p>
+			}
+			@if (store.deleteError(); as message) {
+				<p class="form-error" role="alert">{{ message }}</p>
+			}
+			<div class="form-actions">
+				<button type="button" class="button-danger" [disabled]="store.isDeleting()" (click)="deleteDocument()">
+					{{ store.isDeleting() ? "Deleting…" : isRecursiveDelete() ? "Delete with subcollections" : "Delete document" }}
+				</button>
+				<button type="button" class="button-secondary" [disabled]="store.isDeleting()" (click)="isConfirmingDelete.set(false)">
+					Cancel
+				</button>
+			</div>
+		</div>
+	}
+	@let document = store.document();
+	@if (document.status === "loading") {
+		<p class="body-status">Loading document…</p>
+	} @else if (document.status === "failed") {
+		<p class="form-error" role="alert">{{ document.error }}</p>
+	} @else {
+		<dl class="document-meta">
+			<dt>Path</dt>
+			<dd><code class="document-path">{{ documentPath() }}</code></dd>
+			@if (times(); as time) {
+				<dt>Created</dt>
+				<dd [title]="time.createdUtc + ' (UTC)'">{{ time.created }}</dd>
+				<dt>Updated</dt>
+				<dd [title]="time.updatedUtc + ' (UTC)'">{{ time.updated }}</dd>
+			}
+		</dl>
+		<section class="document-section" aria-labelledby="subcollections-title">
+			<h2 id="subcollections-title" class="section-title">Subcollections</h2>
+			@let subcollections = store.subcollections();
+			@if (subcollections.status === "loading") {
+				<p class="body-status">Loading subcollections…</p>
+			} @else if (subcollections.status === "failed") {
+				<p class="form-error" role="alert">{{ subcollections.error }}</p>
+			} @else {
+				<ul class="subcollection-list">
+					@for (collectionId of subcollections.value; track collectionId) {
+						<li>
+							<a class="subcollection-link" [routerLink]="subcollectionLink(collectionId)">
+								<lucide-icon name="layers" />
+								{{ collectionId }}
+							</a>
+						</li>
+					} @empty {
+						<li class="body-status">No subcollections</li>
+					}
+				</ul>
+			}
+		</section>
+		<section class="document-section" aria-labelledby="fields-title">
+			<h2 id="fields-title" class="section-title">Fields</h2>
+			@if (document.value) {
+				@if (store.saveError(); as message) {
+					<p class="form-error" role="alert">{{ message }}</p>
+				}
+				<app-value-editor [draft]="rootDraft()" [isRoot]="true" (draftChange)="updateFields($event)" />
+			} @else {
+				<p class="body-status">This document does not exist. Its subcollections, if any, are listed above.</p>
+			}
+		</section>
+	}
+</section>

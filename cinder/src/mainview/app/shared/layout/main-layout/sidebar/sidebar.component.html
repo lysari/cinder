@@ -1,0 +1,180 @@
+<header class="sidebar-header">
+	<span class="brand">
+		<span class="brand-mark" aria-hidden="true"></span>
+		Cinder
+	</span>
+	<a class="icon-button" routerLink="/accounts/new" aria-label="Add account" title="Add account">
+		<lucide-icon name="plus" />
+	</a>
+</header>
+<nav class="sidebar-body" aria-label="Accounts">
+	<h2 class="section-label">Accounts</h2>
+	@let accounts = store.accounts();
+	@if (accounts.status === "loading") {
+		<p class="tree-status">Loading accounts…</p>
+	} @else if (accounts.status === "failed") {
+		<p class="tree-status is-error">{{ accounts.error }}</p>
+	} @else if (accounts.value.length === 0) {
+		<div class="sidebar-empty">
+			<lucide-icon name="user-round" />
+			<span>No accounts yet</span>
+		</div>
+	} @else {
+		<ul class="tree">
+			@for (account of accounts.value; track account.id) {
+				<li>
+					<div class="tree-row account-row">
+						<button
+							type="button"
+							class="tree-toggle"
+							[attr.aria-expanded]="isExpanded(account.id)"
+							(click)="toggleAccount(account.id)"
+						>
+							<lucide-icon class="chevron" [name]="isExpanded(account.id) ? 'chevron-down' : 'chevron-right'" />
+							<lucide-icon [name]="accountIcons[account.type]" />
+							<span class="tree-label" [title]="account.label">{{ account.label }}</span>
+						</button>
+						<button
+							type="button"
+							class="icon-button remove-button"
+							aria-label="Remove account"
+							title="Remove account"
+							(click)="askToRemove(account.id)"
+						>
+							<lucide-icon name="trash-2" />
+						</button>
+					</div>
+					@if (removalAccountId() === account.id) {
+						<div class="remove-confirm" role="group" aria-label="Confirm removal">
+							<p>Remove {{ account.label }} and its saved credentials?</p>
+							@if (removalError(); as error) {
+								<p class="is-error">{{ error }}</p>
+							}
+							<div class="remove-actions">
+								<button type="button" class="button-danger" [disabled]="isRemoving()" (click)="removeAccount(account.id)">
+									Remove
+								</button>
+								<button type="button" class="button-secondary" [disabled]="isRemoving()" (click)="cancelRemoval()">
+									Cancel
+								</button>
+							</div>
+						</div>
+					}
+					@if (isExpanded(account.id)) {
+						@let projects = store.projectsOf(account.id);
+						<ul class="tree-group">
+							@if (!projects || projects.status === "loading") {
+								<li class="tree-status">Loading projects…</li>
+							} @else if (projects.status === "failed") {
+								<li class="tree-status is-error">{{ projects.error }}</li>
+							} @else {
+								@for (project of projects.value; track project.projectId) {
+									<li>
+										<button
+											type="button"
+											class="tree-row tree-toggle"
+											[attr.aria-expanded]="isProjectExpanded(account.id, project.projectId)"
+											(click)="toggleProject(account.id, project.projectId)"
+										>
+											<lucide-icon
+												class="chevron"
+												[name]="isProjectExpanded(account.id, project.projectId) ? 'chevron-down' : 'chevron-right'"
+											/>
+											<lucide-icon name="folder" />
+											<span class="tree-label" [title]="project.projectId">{{ project.displayName }}</span>
+										</button>
+										@if (isProjectExpanded(account.id, project.projectId)) {
+											@let databases = store.databasesOf(account.id, project.projectId);
+											<ul class="tree-group">
+												@if (!databases || databases.status === "loading") {
+													<li class="tree-status">Loading databases…</li>
+												} @else if (databases.status === "failed") {
+													<li class="tree-status is-error">{{ databases.error }}</li>
+												} @else {
+													@if (databases.value.warning; as warning) {
+														<li class="tree-status is-warning" [title]="warning">
+															<lucide-icon name="triangle-alert" />
+															<span>{{ warning }}</span>
+														</li>
+													}
+													@for (databaseId of databases.value.databaseIds; track databaseId) {
+														@let database = { accountId: account.id, projectId: project.projectId, databaseId };
+														<li>
+															<div class="tree-row database-row">
+																<button
+																	type="button"
+																	class="database-toggle"
+																	[attr.aria-expanded]="isDatabaseExpanded(database)"
+																	[attr.aria-label]="(isDatabaseExpanded(database) ? 'Collapse ' : 'Expand ') + databaseId"
+																	(click)="toggleDatabase(database)"
+																>
+																	<lucide-icon class="chevron" [name]="isDatabaseExpanded(database) ? 'chevron-down' : 'chevron-right'" />
+																</button>
+																<a
+																	class="database-link"
+																	[routerLink]="databaseLink(database)"
+																	routerLinkActive="is-active"
+																	[routerLinkActiveOptions]="{ exact: true }"
+																	ariaCurrentWhenActive="page"
+																	(click)="expandDatabase(database)"
+																>
+																	<lucide-icon name="database" />
+																	<span class="tree-label">{{ databaseId }}</span>
+																</a>
+																@if (isDatabaseExpanded(database)) {
+																	<button
+																		type="button"
+																		class="icon-button refresh-button"
+																		aria-label="Refresh collections"
+																		title="Refresh collections"
+																		(click)="collections.refreshRootCollections(database)"
+																	>
+																		<lucide-icon name="refresh-cw" />
+																	</button>
+																}
+															</div>
+															@if (isDatabaseExpanded(database)) {
+																@let collectionIds = collections.rootCollectionsOf(database);
+																<ul class="tree-group">
+																	@if (!collectionIds || collectionIds.status === "loading") {
+																		<li class="tree-status">Loading collections…</li>
+																	} @else if (collectionIds.status === "failed") {
+																		<li class="tree-status is-error">{{ collectionIds.error }}</li>
+																	} @else {
+																		@for (collectionId of collectionIds.value; track collectionId) {
+																			<li>
+																				<a
+																					class="tree-row collection-row"
+																					[routerLink]="collectionLink(database, collectionId)"
+																					routerLinkActive="is-active"
+																					ariaCurrentWhenActive="page"
+																				>
+																					<lucide-icon name="layers" />
+																					<span class="tree-label" [title]="collectionId">{{ collectionId }}</span>
+																				</a>
+																			</li>
+																		} @empty {
+																			<li class="tree-status">No collections</li>
+																		}
+																	}
+																</ul>
+															}
+														</li>
+													} @empty {
+														<li class="tree-status">No Firestore databases</li>
+													}
+												}
+											</ul>
+										}
+									</li>
+								} @empty {
+									<li class="tree-status">No projects</li>
+								}
+							}
+						</ul>
+					}
+				</li>
+			}
+		</ul>
+	}
+</nav>

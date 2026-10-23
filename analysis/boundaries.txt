@@ -1,0 +1,233 @@
+
+== electron-main
+ - .webpack/main/index.js {"declared_path":".webpack/main","resolution_context":"package-entrypoint","resolved_path":".webpack/main/index.js","resolution_status":"resolved","limitations":[],"mechanism":"package.json:main"} undefined:undefined:undefined
+
+== electron-preload
+ - .webpack/main/preload.js {"declared_path":"preload.js","resolution_context":"filesystem-expression","resolved_path":".webpack/main/preload.js","resolution_status":"resolved","limitations":[],"mechanism":"BrowserWindow:webPreferences.preload"} .webpack/main/index.js:2:3971266
+ - .webpack/main/preload.js {"declared_path":"preload.js","resolution_context":"filesystem-expression","resolved_path":".webpack/main/preload.js","resolution_status":"resolved","limitations":[],"mechanism":"property:preload"} .webpack/main/index.js:2:3971505
+
+== electron-renderer
+ - .webpack/renderer/main_window/index.html {"declared_path":".webpack/renderer/main_window/index.html","resolution_context":"html-reference","resolved_path":".webpack/renderer/main_window/index.html","resolution_status":"resolved","limitations":[],"mechanism":"html-script-entrypoint"} undefined:undefined:undefined
+ - https://assets.firefoo.app/text/licenses.html {"declared_path":"https://assets.firefoo.app/text/licenses.html","resolution_context":"module-specifier","resolved_path":null,"resolution_status":"external","limitations":["Only file URLs can be mapped to selected local application artifacts."],"mechanism":"ca .webpack/main/index.js:2:3973988
+ - https://app.chaport.com/widget/show.html?appid=607b1fb026c3821e0faa432e&connect=1 {"declared_path":"https://app.chaport.com/widget/show.html?appid=607b1fb026c3821e0faa432e&connect=1","resolution_context":"module-specifier","resolved_path":null,"resolution_status":"external","limitations":["Only file URLs can be mapped to selected local appl .webpack/main/index.js:2:3960422
+
+== browser-window
+ - BrowserWindow@2:3973988-2:3974041 {"source_path":".webpack/main/index.js","options_status":"object-literal","web_preferences_status":"missing","web_preferences":[],"preload_path":null,"preload_resolution_context":null,"absence_means_default":false} .webpack/main/index.js:2:3973988
+ - BrowserWindow@2:3971266-2:3971573 {"source_path":".webpack/main/index.js","options_status":"object-literal","web_preferences_status":"object-literal","web_preferences":[{"name":"allowRunningInsecureContent","value":{"status":"dynamic","value":null,"expression":"!0"}},{"name":"contextIsolation" .webpack/main/index.js:2:3971266
+ - BrowserWindow@2:3960426-2:3960539 {"source_path":".webpack/main/index.js","options_status":"object-literal","web_preferences_status":"object-literal","web_preferences":[],"preload_path":null,"preload_resolution_context":null,"absence_means_default":false} .webpack/main/index.js:2:3960426
+
+== ipc-channel
+ - e {"side":"main","operation":"handle","mode":"handle","channel":null,"channel_expression":"e","resolution":"dynamic"} .webpack/main/index.js:2:3968729
+ - f2p-message {"side":"main","operation":"on","mode":"listen","channel":"f2p-message","channel_expression":null,"resolution":"literal"} .webpack/main/index.js:2:3940287
+ - ShowContextMenu {"side":"main","operation":"handle","mode":"handle","channel":"ShowContextMenu","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3978143},"end":{"line":2,"column":3978419}}} .webpack/main/index.js:2:3968729
+ - QuitAndUpdate {"side":"main","operation":"handle","mode":"handle","channel":"QuitAndUpdate","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3973604},"end":{"line":2,"column":3973853}}} .webpack/main/index.js:2:3968729
+ - OpenChat {"side":"main","operation":"handle","mode":"handle","channel":"OpenChat","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3973456},"end":{"line":2,"column":3973603}}} .webpack/main/index.js:2:3968729
+ - OpenLicenses {"side":"main","operation":"handle","mode":"handle","channel":"OpenLicenses","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3973854},"end":{"line":2,"column":3974111}}} .webpack/main/index.js:2:3968729
+ - SetIsScriptRunning {"side":"main","operation":"handle","mode":"handle","channel":"SetIsScriptRunning","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3973078},"end":{"line":2,"column":3973259}}} .webpack/main/index.js:2:3968729
+ - SetH {"side":"main","operation":"handle","mode":"handle","channel":"SetH","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3977700},"end":{"line":2,"column":3977878}}} .webpack/main/index.js:2:3968729
+ - TerminateFirefoo {"side":"main","operation":"handle","mode":"handle","channel":"TerminateFirefoo","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3971826},"end":{"line":2,"column":3972083}}} .webpack/main/index.js:2:3968729
+ - LoginViaGoogle {"side":"main","operation":"handle","mode":"handle","channel":"LoginViaGoogle","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3974748},"end":{"line":2,"column":3977323}}} .webpack/main/index.js:2:3968729
+ - ShowSaveDialog {"side":"main","operation":"handle","mode":"handle","channel":"ShowSaveDialog","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3972551},"end":{"line":2,"column":3972731}}} .webpack/main/index.js:2:3968729
+ - ShowOpenDialog {"side":"main","operation":"handle","mode":"handle","channel":"ShowOpenDialog","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3972732},"end":{"line":2,"column":3972912}}} .webpack/main/index.js:2:3968729
+ - ExecuteShortScript {"side":"main","operation":"handle","mode":"handle","channel":"ExecuteShortScript","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3974112},"end":{"line":2,"column":3974747}}} .webpack/main/index.js:2:3968729
+ - SetUserAccount {"side":"main","operation":"handle","mode":"handle","channel":"SetUserAccount","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3972084},"end":{"line":2,"column":3972312}}} .webpack/main/index.js:2:3968729
+ - SetServiceAccount {"side":"main","operation":"handle","mode":"handle","channel":"SetServiceAccount","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3972313},"end":{"line":2,"column":3972550}}} .webpack/main/index.js:2:3968729
+ - ForceRendererCrash {"side":"main","operation":"handle","mode":"handle","channel":"ForceRendererCrash","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3978420},"end":{"line":2,"column":3978613}}} .webpack/main/index.js:2:3968729
+ - SetTabInfo {"side":"main","operation":"handle","mode":"handle","channel":"SetTabInfo","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3972913},"end":{"line":2,"column":3973077}}} .webpack/main/index.js:2:3968729
+ - GetPlatform {"side":"main","operation":"handle","mode":"handle","channel":"GetPlatform","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3977538},"end":{"line":2,"column":3977699}}} .webpack/main/index.js:2:3968729
+ - GetMachineId {"side":"main","operation":"handle","mode":"handle","channel":"GetMachineId","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3977324},"end":{"line":2,"column":3977537}}} .webpack/main/index.js:2:3968729
+ - ToggleMaximize {"side":"main","operation":"handle","mode":"handle","channel":"ToggleMaximize","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3973260},"end":{"line":2,"column":3973455}}} .webpack/main/index.js:2:3968729
+ - RunAutoUpdater {"side":"main","operation":"handle","mode":"handle","channel":"RunAutoUpdater","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3977879},"end":{"line":2,"column":3978142}}} .webpack/main/index.js:2:3968729
+ - GetInitialMainState {"side":"main","operation":"handle","mode":"handle","channel":"GetInitialMainState","channel_expression":null,"resolution":"literal","invocation_location":{"start":{"line":2,"column":3978614},"end":{"line":2,"column":3978789}}} .webpack/main/index.js:2:3968729
+
+== storage
+ - indexed-db {"storage_kind":"indexed-db","name":null,"mechanism":"call:self.indexedDB.open"} .webpack/main/ficoprocess.js:2:959524
+ - indexed-db {"storage_kind":"indexed-db","name":null,"mechanism":"call:self.indexedDB.open"} .webpack/main/index.js:2:959524
+
+== worker
+ -  {"declared_specifier":null,"expression":"new Worker(d)","resolved_path":null,"resolution_status":null} .webpack/main/index.js:2:2957514
+ -  {"declared_specifier":null,"expression":"new Worker(n)","resolved_path":null,"resolution_status":null} .webpack/main/ficoprocess.js:2:3253711
+ -  {"declared_specifier":null,"expression":"new Worker(d)","resolved_path":null,"resolution_status":null} .webpack/main/ficoprocess.js:2:3150816
+ -  {"declared_specifier":null,"expression":"new Worker(n)","resolved_path":null,"resolution_status":null} .webpack/main/index.js:2:3060409
+ -  {"declared_specifier":null,"expression":"new Worker(oe?oe.createScriptURL(t):t,{name:e})","resolved_path":null,"resolution_status":null} .webpack/renderer/7667/index.js:2:1565455
+
+== endpoint
+ - listDocuments {"endpoint_kind":"network","value":"listDocuments","mechanism":"call:firestore.request","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:335071
+ - jsx {"endpoint_kind":"network","value":"jsx","mechanism":"call:n.pragmas.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1415240
+ - logging_enabled {"endpoint_kind":"network","value":"logging_enabled","mechanism":"call:_r.get","interpretation":"candidate"} .webpack/main/index.js:2:766188
+ - network endpoint {"endpoint_kind":"network","value":"https://app.chaport.com/widget/show.html?appid=607b1fb026c3821e0faa432e&connect=1","mechanism":"call:loadURL"} .webpack/main/index.js:2:3960422
+ - text {"endpoint_kind":"network","value":"text","mechanism":"call:t.get","interpretation":"candidate"} .webpack/renderer/7667/index.js:2:2217200
+ - text {"endpoint_kind":"network","value":"text","mechanism":"call:i.get","interpretation":"candidate"} .webpack/renderer/7667/index.js:2:2247742
+ - beginTransaction {"endpoint_kind":"network","value":"beginTransaction","mechanism":"call:_firestore.request","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:348070
+ - console.lock {"endpoint_kind":"network","value":"console.lock","mechanism":"call:h.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:3088833
+ - local {"endpoint_kind":"network","value":"local","mechanism":"call:get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1343060
+ - grpc-status-details-bin {"endpoint_kind":"network","value":"grpc-status-details-bin","mechanism":"call:e.metadata.get","interpretation":"candidate"} .webpack/main/index.js:2:1791643
+ - grpc-status-details-bin {"endpoint_kind":"network","value":"grpc-status-details-bin","mechanism":"call:e.metadata.get","interpretation":"candidate"} .webpack/main/index.js:2:1791566
+ - default {"endpoint_kind":"network","value":"default","mechanism":"call:D.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1425976
+ - firstChunk {"endpoint_kind":"network","value":"firstChunk","mechanism":"call:get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:1014263
+ - grpc-accept-encoding {"endpoint_kind":"network","value":"grpc-accept-encoding","mechanism":"call:e.get","interpretation":"candidate"} .webpack/main/index.js:2:470191
+ - logging_enabled {"endpoint_kind":"network","value":"logging_enabled","mechanism":"call:_r.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:766188
+ - previous_websocket_failure {"endpoint_kind":"network","value":"previous_websocket_failure","mechanism":"call:br.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:773057
+ - e {"endpoint_kind":"network","value":"e","mechanism":"call:fetch","resolution":"partial"} .webpack/renderer/json.worker/index.js:2:331909
+ - grpc-encoding {"endpoint_kind":"network","value":"grpc-encoding","mechanism":"call:o.get","interpretation":"candidate"} .webpack/main/index.js:2:553565
+ - grpc-encoding {"endpoint_kind":"network","value":"grpc-encoding","mechanism":"call:e.get","interpretation":"candidate"} .webpack/main/index.js:2:470055
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2531755
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2537295
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2538006
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2531430
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2535690
+ - real {"endpoint_kind":"network","value":"real","mechanism":"call:o.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1339166
+ - previous_websocket_failure {"endpoint_kind":"network","value":"previous_websocket_failure","mechanism":"call:br.get","interpretation":"candidate"} .webpack/main/index.js:2:773057
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4294666
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4240675
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4208921
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4258672
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4276669
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:i.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:5297827
+ - uri {"endpoint_kind":"network","value":"uri","mechanism":"call:get","interpretation":"candidate"} .webpack/main/index.js:2:1004979
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4087732
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4069735
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4123726
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4043575
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4105729
+ - referrer-policy {"endpoint_kind":"network","value":"referrer-policy","mechanism":"call:e.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:5299150
+ - OneAsymmetricKey {"endpoint_kind":"network","value":"OneAsymmetricKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2524421
+ - OneAsymmetricKey {"endpoint_kind":"network","value":"OneAsymmetricKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2528421
+ - grpc-status-details-bin {"endpoint_kind":"network","value":"grpc-status-details-bin","mechanism":"call:e.metadata.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:1794960
+ - grpc-status-details-bin {"endpoint_kind":"network","value":"grpc-status-details-bin","mechanism":"call:e.metadata.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:1794883
+ - jsximportsource {"endpoint_kind":"network","value":"jsximportsource","mechanism":"call:t.pragmas.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:922334
+ - console.level {"endpoint_kind":"network","value":"console.level","mechanism":"call:h.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:3088765
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4133316
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4115319
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4079325
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4053805
+ - Location {"endpoint_kind":"network","value":"Location","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4097322
+ - localhost {"endpoint_kind":"route","value":"localhost","mechanism":"property:path"} .webpack/main/ficoprocess.js:2:573781
+ - listDocuments {"endpoint_kind":"network","value":"listDocuments","mechanism":"call:firestore.request","interpretation":"candidate"} .webpack/main/index.js:2:335071
+ - firstChunk {"endpoint_kind":"network","value":"firstChunk","mechanism":"call:get","interpretation":"candidate"} .webpack/main/index.js:2:1010946
+ - grpc-accept-encoding {"endpoint_kind":"network","value":"grpc-accept-encoding","mechanism":"call:e.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:470191
+ - beginTransaction {"endpoint_kind":"network","value":"beginTransaction","mechanism":"call:_firestore.request","interpretation":"candidate"} .webpack/main/index.js:2:348070
+ -  {"endpoint_kind":"network","value":"","mechanism":"call:m.delete","interpretation":"candidate"} .webpack/main/index.js:2:3335855
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4278178
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:i.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:5299728
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4260181
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4210485
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4296175
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4242184
+ - globalThis {"endpoint_kind":"network","value":"globalThis","mechanism":"call:a.locals.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1411718
+ - bind {"endpoint_kind":"network","value":"bind","mechanism":"call:n.members.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1666475
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4267079
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4249082
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4231085
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4198691
+ - content-type {"endpoint_kind":"network","value":"content-type","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:4285076
+ - jsxfrag {"endpoint_kind":"network","value":"jsxfrag","mechanism":"call:t.pragmas.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1932616
+ - jsxfrag {"endpoint_kind":"network","value":"jsxfrag","mechanism":"call:t.pragmas.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1414366
+ - console.lock {"endpoint_kind":"network","value":"console.lock","mechanism":"call:h.get","interpretation":"candidate"} .webpack/main/index.js:2:2895531
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2527857
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2525275
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2520509
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2521888
+ - __index {"endpoint_kind":"network","value":"__index","mechanism":"call:e.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1534230
+ - localhost {"endpoint_kind":"route","value":"localhost","mechanism":"property:path"} .webpack/main/index.js:2:573781
+ - utf-8 {"endpoint_kind":"network","value":"utf-8","mechanism":"call:a.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:17053
+ - __call {"endpoint_kind":"network","value":"__call","mechanism":"call:get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1514557
+ - __call {"endpoint_kind":"network","value":"__call","mechanism":"call:r.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1502536
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2528236
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2520320
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2525250
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2526046
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2518062
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2528723
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2524595
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2521523
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2540388
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2534419
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2537806
+ - RSAPublicKey {"endpoint_kind":"network","value":"RSAPublicKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2533040
+ - rollback {"endpoint_kind":"network","value":"rollback","mechanism":"call:_firestore.request","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:348400
+ - code {"endpoint_kind":"network","value":"code","mechanism":"call:i.get","interpretation":"candidate"} .webpack/main/index.js:2:3975809
+ - __new {"endpoint_kind":"network","value":"__new","mechanism":"call:i.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1514587
+ - __new {"endpoint_kind":"network","value":"__new","mechanism":"call:r.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1502586
+ - listCollectionIds {"endpoint_kind":"network","value":"listCollectionIds","mechanism":"call:_firestore.request","interpretation":"candidate"} .webpack/main/index.js:2:318309
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2528056
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2523701
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2525501
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2519126
+ - __export {"endpoint_kind":"network","value":"__export","mechanism":"call:r.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1420762
+ - __export {"endpoint_kind":"network","value":"__export","mechanism":"call:a.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1443478
+ - __export {"endpoint_kind":"network","value":"__export","mechanism":"call:r.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1457360
+ - grpc-encoding {"endpoint_kind":"network","value":"grpc-encoding","mechanism":"call:o.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:553565
+ - grpc-encoding {"endpoint_kind":"network","value":"grpc-encoding","mechanism":"call:e.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:470055
+ - listCollectionIds {"endpoint_kind":"network","value":"listCollectionIds","mechanism":"call:_firestore.request","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:318309
+ - OneAsymmetricKey {"endpoint_kind":"network","value":"OneAsymmetricKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2536952
+ - OneAsymmetricKey {"endpoint_kind":"network","value":"OneAsymmetricKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2540952
+ - console.level {"endpoint_kind":"network","value":"console.level","mechanism":"call:h.get","interpretation":"candidate"} .webpack/main/index.js:2:2895463
+ - authorization {"endpoint_kind":"network","value":"authorization","mechanism":"call:n.get","interpretation":"candidate"} .webpack/main/index.js:2:413491
+ - prototype {"endpoint_kind":"network","value":"prototype","mechanism":"call:r.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1497717
+ - authorization {"endpoint_kind":"network","value":"authorization","mechanism":"call:n.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:413491
+ - this {"endpoint_kind":"network","value":"this","mechanism":"call:r.delete","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1396693
+ - rollback {"endpoint_kind":"network","value":"rollback","mechanism":"call:_firestore.request","interpretation":"candidate"} .webpack/main/index.js:2:348400
+ - / {"endpoint_kind":"route","value":"/","mechanism":"property:path"} .webpack/renderer/7667/index.js:2:1819079
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4098831
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4080834
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4055369
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4116828
+ - Content-Encoding {"endpoint_kind":"network","value":"Content-Encoding","mechanism":"call:t.get","interpretation":"candidate"} .webpack/main/index.js:2:4134825
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2539355
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2536040
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2537321
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2531395
+ - merged {"endpoint_kind":"network","value":"merged","mechanism":"call:o.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1339196
+ - utf-8 {"endpoint_kind":"network","value":"utf-8","mechanism":"call:a.get","interpretation":"candidate"} .webpack/main/index.js:2:17053
+ - uri {"endpoint_kind":"network","value":"uri","mechanism":"call:get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:1008296
+ - __constructor {"endpoint_kind":"network","value":"__constructor","mechanism":"call:t.members.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1515282
+ - __constructor {"endpoint_kind":"network","value":"__constructor","mechanism":"call:e.members.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:2722348
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:e.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1456597
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:n.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1455396
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:s.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1438130
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:e.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1436848
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:l.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1439615
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:a.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1445777
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:a.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:2453501
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:t.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1460060
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:n.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1486510
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:n.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1328380
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:f.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1379390
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:a.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1442837
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:f.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1379419
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:n.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:2703779
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:n.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1460168
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:t.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:1885872
+ - export= {"endpoint_kind":"network","value":"export=","mechanism":"call:r.exports.get","interpretation":"candidate"} .webpack/renderer/ts.worker/index.js:2:2705464
+ - network endpoint {"endpoint_kind":"network","value":"https://assets.firefoo.app/text/licenses.html","mechanism":"call:loadURL"} .webpack/main/index.js:2:3973988
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2518864
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2524790
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2523509
+ - RSAPrivateKey {"endpoint_kind":"network","value":"RSAPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2526824
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2530593
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2540767
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2532851
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2538577
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2534054
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2537126
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2537781
+ - PublicKeyInfo {"endpoint_kind":"network","value":"PublicKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2541254
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2531657
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2538032
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2536232
+ - ECPrivateKey {"endpoint_kind":"network","value":"ECPrivateKey","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/ficoprocess.js:2:2540587
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2524764
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2518899
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2519224
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:l.get","interpretation":"candidate"} .webpack/main/index.js:2:2525475
+ - PrivateKeyInfo {"endpoint_kind":"network","value":"PrivateKeyInfo","mechanism":"call:u.get","interpretation":"candidate"} .webpack/main/index.js:2:2523159
+
+== package
+ - Firefoo {"path":"package.json","name":"Firefoo","version":"1.5.11","main":".webpack/main","renderer":null,"parse_status":"included"} undefined:undefined:undefined
+
+== unknown
+ - .webpack/renderer/main_window/index.html parse scope {"inline_script_count":1,"inline_scripts":[{"script_type":"classic","location":{"start":{"line":22,"column":23},"end":{"line":22,"column":70}}}],"path":".webpack/renderer/main_window/index.html","operation":"parse-html-inline-scripts","limitation":".webpack/re undefined:undefined:undefined
+ - .webpack/renderer/main_window/index.js parse scope {"analysis_status":"interrupted","path":".webpack/renderer/main_window/index.js","operation":"analyze-javascript-source","limitation":".webpack/renderer/main_window/index.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker ex undefined:undefined:undefined
+ - .webpack/main/index.js parse scope {"analysis_status":"interrupted","path":".webpack/main/index.js","operation":"analyze-javascript-source","limitation":".webpack/main/index.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing undefined:undefined:undefined
+ - .webpack/main/ficoprocess.js parse scope {"analysis_status":"interrupted","path":".webpack/main/ficoprocess.js","operation":"analyze-javascript-source","limitation":".webpack/main/ficoprocess.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap whi undefined:undefined:undefined

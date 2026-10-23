@@ -1,0 +1,49 @@
+<header class="page-header">
+	<app-explorer-breadcrumb
+		[database]="database()"
+		[accountLabel]="accountLabel()"
+		[path]="collectionPath()"
+		currentLabel="New document"
+	/>
+</header>
+<form class="add-document form" (submit)="create($event)">
+	<h1 class="page-title">New document in <code>{{ collectionPath() }}</code></h1>
+	<fieldset class="field">
+		<legend class="field-label">Document id</legend>
+		<label class="id-option">
+			<input type="radio" name="id-mode" [checked]="store.isAutoId()" (change)="setAutoId(true)" />
+			Generated id <code class="auto-id">{{ store.autoId }}</code>
+		</label>
+		<label class="id-option">
+			<input type="radio" name="id-mode" [checked]="!store.isAutoId()" (change)="setAutoId(false)" />
+			Use this id
+		</label>
+		@if (!store.isAutoId()) {
+			<input
+				class="text-input id-input"
+				aria-label="Custom document id"
+				spellcheck="false"
+				autocomplete="off"
+				[class.is-invalid]="store.documentIdError() !== null"
+				[value]="store.documentId()"
+				(input)="setDocumentId($event)"
+			/>
+			@if (store.documentIdError(); as message) {
+				<p class="field-error">{{ message }}</p>
+			}
+		}
+	</fieldset>
+	<section class="field" aria-labelledby="new-fields-title">
+		<h2 id="new-fields-title" class="field-label">Fields</h2>
+		<app-value-editor [draft]="rootDraft()" [isRoot]="true" (draftChange)="updateFields($event)" />
+	</section>
+	@if (store.error(); as message) {
+		<p class="form-error" role="alert">{{ message }}</p>
+	}
+	<div class="form-actions">
+		<button type="submit" class="button-primary" [disabled]="!store.canCreate()">
+			{{ store.isCreating() ? "Creating…" : "Create document" }}
+		</button>
+		<a class="button-secondary" [routerLink]="collectionLink()">Cancel</a>
+	</div>
+</form>

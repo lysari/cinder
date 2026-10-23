@@ -1,0 +1,137 @@
+@let current = draft();
+@let point = geoPoint();
+@let mapFields = fields();
+@let arrayItems = items();
+@let message = error();
+@let note = hint();
+@if (!isRoot()) {
+	<div class="value-row">
+		<select class="type-select" aria-label="Type" [value]="current.type" (change)="changeType($event)">
+			<option value="string">string</option>
+			<option value="integer">integer</option>
+			<option value="double">double</option>
+			<option value="boolean">boolean</option>
+			<option value="null">null</option>
+			<option value="timestamp">timestamp</option>
+			<option value="geopoint">geopoint</option>
+			<option value="reference">reference</option>
+			<option value="bytes">bytes</option>
+			<option value="vector">vector</option>
+			<option value="map">map</option>
+			<option value="array">array</option>
+		</select>
+		@if (current.type === "string") {
+			<textarea
+				class="text-input value-input"
+				aria-label="String value"
+				spellcheck="false"
+				[rows]="textRows()"
+				[value]="text()"
+				(input)="setText($event)"
+			></textarea>
+		} @else if (current.type === "boolean") {
+			<select class="value-input boolean-select" aria-label="Boolean value" [value]="booleanText()" (change)="setBoolean($event)">
+				<option value="true">true</option>
+				<option value="false">false</option>
+			</select>
+		} @else if (current.type === "null") {
+			<span class="value-note">null</span>
+		} @else if (point) {
+			<input
+				class="text-input value-input"
+				aria-label="Latitude"
+				placeholder="Latitude"
+				inputmode="decimal"
+				[class.is-invalid]="error() !== null"
+				[value]="point.latitude"
+				(input)="setLatitude($event)"
+			/>
+			<input
+				class="text-input value-input"
+				aria-label="Longitude"
+				placeholder="Longitude"
+				inputmode="decimal"
+				[class.is-invalid]="error() !== null"
+				[value]="point.longitude"
+				(input)="setLongitude($event)"
+			/>
+		} @else if (mapFields) {
+			<span class="value-note">{{ mapFields.length === 1 ? "1 field" : mapFields.length + " fields" }}</span>
+		} @else if (arrayItems) {
+			<span class="value-note">{{ arrayItems.length === 1 ? "1 item" : arrayItems.length + " items" }}</span>
+		} @else {
+			<input
+				class="text-input value-input"
+				spellcheck="false"
+				autocomplete="off"
+				[attr.aria-label]="current.type + ' value'"
+				[attr.aria-invalid]="error() !== null"
+				[class.is-invalid]="error() !== null"
+				[value]="text()"
+				(input)="setText($event)"
+			/>
+		}
+	</div>
+	@if (message) {
+		<p class="field-error">{{ message }}</p>
+	} @else if (note) {
+		<p class="field-hint">{{ note }}</p>
+	}
+}
+@if (mapFields || arrayItems) {
+	<div class="children" [class.is-root]="isRoot()">
+		@if (mapFields) {
+			<ul class="entries">
+				@for (field of mapFields; track field.id) {
+					<li class="entry">
+						<div class="entry-head">
+							<input
+								class="text-input name-input"
+								aria-label="Field name"
+								placeholder="Field name"
+								spellcheck="false"
+								autocomplete="off"
+								[class.is-invalid]="nameError(field) !== null"
+								[value]="field.name"
+								(input)="renameField(field.id, $event)"
+							/>
+							<app-value-editor class="entry-value" [draft]="field.value" (draftChange)="setFieldValue(field.id, $event)" />
+							<button type="button" class="icon-button" aria-label="Delete field" title="Delete field" (click)="removeField(field.id)">
+								<lucide-icon name="trash-2" />
+							</button>
+						</div>
+						@if (nameError(field); as nameMessage) {
+							<p class="field-error">{{ nameMessage }}</p>
+						}
+					</li>
+				} @empty {
+					<li class="entries-empty">{{ isRoot() ? "No fields" : "Empty map" }}</li>
+				}
+			</ul>
+			<button type="button" class="button-secondary add-button" (click)="addField()">
+				<lucide-icon name="plus" />
+				Add field
+			</button>
+		} @else if (arrayItems) {
+			<ul class="entries">
+				@for (item of arrayItems; track $index) {
+					<li class="entry">
+						<div class="entry-head">
+							<span class="item-index">[{{ $index }}]</span>
+							<app-value-editor class="entry-value" [draft]="item" (draftChange)="setItem($index, $event)" />
+							<button type="button" class="icon-button" aria-label="Remove item" title="Remove item" (click)="removeItem($index)">
+								<lucide-icon name="trash-2" />
+							</button>
+						</div>
+					</li>
+				} @empty {
+					<li class="entries-empty">Empty array</li>
+				}
+			</ul>
+			<button type="button" class="button-secondary add-button" (click)="addItem()">
+				<lucide-icon name="plus" />
+				Add item
+			</button>
+		}
+	</div>
+}

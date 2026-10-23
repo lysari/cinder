@@ -1,0 +1,30 @@
+<table class="collection-table">
+	<thead>
+		<tr>
+			<th scope="col" class="id-cell">ID</th>
+			@for (name of fieldNames(); track name) {
+				<th scope="col" [title]="name">{{ name }}</th>
+			}
+		</tr>
+	</thead>
+	<tbody>
+		@for (document of documents(); track document.path) {
+			<tr (click)="documentSelected.emit(document.path)">
+				<th scope="row" class="id-cell">
+					<a class="id-link" [routerLink]="documentLink(document.path)" [title]="document.id" (click)="$event.stopPropagation()">
+						{{ document.id }}
+					</a>
+				</th>
+				@for (name of fieldNames(); track name) {
+					<td>
+						@if (document.fields[name]; as value) {
+							<app-value-cell [value]="value" [database]="database()" />
+						} @else {
+							<span class="missing-value" aria-label="No value">—</span>
+						}
+					</td>
+				}
+			</tr>
+		}
+	</tbody>
+</table>

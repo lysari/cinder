@@ -1,0 +1,43 @@
+{
+	"name": "cinder",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"description": "Desktop GUI client for Cloud Firestore",
+	"scripts": {
+		"prepare:devkit": "electrobun prepare",
+		"build:view": "electrobun prepare && vite build",
+		"build:worker": "bun build src/worker/index.ts --target=bun --outfile=dist/worker.js",
+		"dev": "bun run build:view && bun run build:worker && electrobun dev",
+		"build": "bun run build:view && bun run build:worker && electrobun build --env=stable",
+		"emulator": "firebase emulators:start --only firestore --project demo-cinder",
+		"typecheck": "tsc --noEmit -p tsconfig.json && ngc --noEmit -p src/mainview/tsconfig.app.json",
+		"test": "bun test --path-ignore-patterns='.hutch*/**' --pass-with-no-tests"
+	},
+	"dependencies": {
+		"@angular/common": "19.2.25",
+		"@angular/compiler": "19.2.25",
+		"@angular/core": "19.2.25",
+		"@angular/forms": "19.2.25",
+		"@angular/platform-browser": "19.2.25",
+		"@angular/router": "19.2.25",
+		"@codemirror/lang-javascript": "6.2.5",
+		"@google-cloud/firestore": "9.4.0",
+		"codemirror": "6.0.2",
+		"google-auth-library": "11.3.1",
+		"lucide-angular": "1.0.0",
+		"rxjs": "7.8.2",
+		"zone.js": "0.15.1"
+	},
+	"devDependencies": {
+		"@analogjs/vite-plugin-angular": "1.22.5",
+		"@angular/build": "19.2.27",
+		"@angular/compiler-cli": "19.2.25",
+		"@types/bun": "1.4.4",
+		"electrobun": "2.0.4",
+		"firebase-tools": "15.34.1",
+		"sass": "1.106.1",
+		"typescript": "5.8.3",
+		"vite": "6.4.3"
+	}
+}

@@ -1,0 +1,21 @@
+<section class="start">
+	@let accounts = store.accounts();
+	@if (accounts.status === "loaded" && accounts.value.length > 0) {
+		<app-empty-state
+			icon="database"
+			heading="Select a database"
+			text="Expand an account and a project in the sidebar, then choose a database to browse."
+		/>
+	} @else if (accounts.status === "loaded") {
+		<app-empty-state
+			icon="database"
+			heading="No accounts yet"
+			text="Cinder browses and queries Cloud Firestore through a Google account, a service account, or a local emulator."
+		>
+			<a class="button-primary" routerLink="/accounts/new">
+				<lucide-icon name="plus" />
+				Add account
+			</a>
+		</app-empty-state>
+	}
+</section>

@@ -1,0 +1,27 @@
+<ol class="breadcrumb" aria-label="Location">
+	<li class="crumb">{{ accountLabel() }}</li>
+	<li class="separator" aria-hidden="true"><lucide-icon name="chevron-right" /></li>
+	<li class="crumb">{{ database().projectId }}</li>
+	<li class="separator" aria-hidden="true"><lucide-icon name="chevron-right" /></li>
+	<li class="crumb">
+		@if (isDatabaseCurrent()) {
+			<span class="is-current" aria-current="page">{{ database().databaseId }}</span>
+		} @else {
+			<a class="crumb-link" [routerLink]="databaseLink()">{{ database().databaseId }}</a>
+		}
+	</li>
+	@for (crumb of crumbs(); track crumb.path; let isLast = $last) {
+		<li class="separator" aria-hidden="true"><lucide-icon name="chevron-right" /></li>
+		<li class="crumb">
+			@if (isLast && currentLabel() === null) {
+				<span class="is-current" aria-current="page" [title]="crumb.path">{{ crumb.id }}</span>
+			} @else {
+				<a class="crumb-link" [routerLink]="crumb.route" [title]="crumb.path">{{ crumb.id }}</a>
+			}
+		</li>
+	}
+	@if (currentLabel(); as label) {
+		<li class="separator" aria-hidden="true"><lucide-icon name="chevron-right" /></li>
+		<li class="crumb"><span class="is-current" aria-current="page">{{ label }}</span></li>
+	}
+</ol>

@@ -1,0 +1,21 @@
+:host {
+	--emulator-account-form-port-width: 120px;
+
+	display: block;
+}
+
+.form {
+	.port-input {
+		width: var(--emulator-account-form-port-width);
+	}
+
+	.project-id-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+	}
+
+	.add-project-button {
+		align-self: flex-start;
+	}
+}

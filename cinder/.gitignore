@@ -1,0 +1,10 @@
+.hutch/
+.hutch-home/
+node_modules/
+build/
+dist/
+artifacts/
+*.tsbuildinfo
+*.log
+.DS_Store
+.cottontail-tmp/

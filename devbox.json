@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.18.4/.schema/devbox.schema.json",
+  "packages": [
+    "nodejs@22",
+    "bun@1.4.2",
+    "jdk-headless@21"
+  ],
+  "env": {
+    "HUTCH_HOME": "$PWD/cinder/.hutch-home"
+  },
+  "shell": {
+    "init_hook": [
+      "unset DEVELOPER_DIR SDKROOT NIX_APPLE_SDK_VERSION"
+    ]
+  }
+}
