@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/framework-Electrobun%202.0-8A2BE2" alt="Electrobun 2.0">
   <img src="https://img.shields.io/badge/frontend-Angular%2019-DD0031?logo=angular&logoColor=white" alt="Angular 19">
   <img src="https://img.shields.io/badge/database-Firestore-FFCA28?logo=firebase&logoColor=black" alt="Cloud Firestore">
+  <a href="https://github.com/lysari/vibecode-skills"><img src="https://img.shields.io/badge/built%20with-Vibecode%20Skills-8A63D2" alt="Built with Vibecode Skills"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"></a>
 </p>
@@ -22,12 +23,18 @@
 <p align="center">
   <a href="#why-cinder">Why Cinder</a> ·
   <a href="#features">Features</a> ·
+  <a href="#showcase">Showcase</a> ·
   <a href="#getting-started">Getting started</a> ·
   <a href="#architecture">Architecture</a> ·
+  <a href="#built-with-vibecode">Built with Vibecode</a> ·
   <a href="#shortcuts">Shortcuts</a> ·
   <a href="#data-formats">Data formats</a> ·
   <a href="#security--privacy">Security & Privacy</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+<p align="center">
+  <img src="docs/images/hero.png" alt="Cinder Desktop Client: multi-project sidebar, collection data table, realtime live view, and task workers">
 </p>
 
 ---
@@ -59,6 +66,31 @@ Cinder is built from the ground up to solve these problems:
 | 🗑️ **Recursive Collection Deletion** | Safely delete collections and all nested subcollections at any depth, with document count confirmation and explicit path verification. |
 | 🧵 **Supervised Task Pipeline** | Track exports, imports, bulk updates, and scripts on a dedicated Tasks dashboard with live progress meters, counts, logs, and one-click cancellation. |
 | ⌨️ **Command Palette & Tabs** | Press `Cmd+K` to search accounts, projects, databases, open tabs, and commands. Full multi-tab layout with persistent state across restarts. |
+
+## Showcase
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/images/showcase-explorer.png" width="460" alt="Data Explorer"><br>
+      <sub><b>Data Explorer (Table, Tree & JSON with Realtime Streaming)</b></sub>
+    </td>
+    <td align="center">
+      <img src="docs/images/showcase-palette.png" width="460" alt="Command Palette"><br>
+      <sub><b>Command Palette (<kbd>Cmd</kbd>+<kbd>K</kbd> Fast Navigation)</b></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/images/showcase-start.png" width="460" alt="Multi-Account Manager"><br>
+      <sub><b>Multi-Account Manager (OAuth, Service Account, Emulator)</b></sub>
+    </td>
+    <td align="center">
+      <img src="docs/images/showcase-tasks.png" width="460" alt="Supervised Task Pipeline"><br>
+      <sub><b>Supervised Task Pipeline & Transfer</b></sub>
+    </td>
+  </tr>
+</table>
 
 ## Security & Privacy
 
@@ -184,6 +216,21 @@ flowchart TB
 | [`cinder/scripts/`](cinder/scripts) | Icon generation and OAuth client configuration tooling |
 | [`cinder/tests/`](cinder/tests) | Test suite for workers, CSV parsers, encoders, and stores |
 | [`cinder/docs/`](cinder/docs) | Comprehensive technical architecture and subsystem documentation |
+
+## Built with Vibecode Skills
+
+This codebase is crafted following the **[Vibecode Skills](https://github.com/lysari/vibecode-skills)** methodology.
+
+Instead of letting AI coding agents write messy prototypes, duplicate files, or introduce bloated wrappers, Vibecode skills enforce developer discipline across the lifecycle:
+
+- **Clean In-Place Edits**: Code is modified minimally and cleanly to match existing project conventions without unnecessary abstractions.
+- **Continuous Rule Auditing**: Every agent workflow runs through automated rule compliance reviews (`/vibecode-review`) before changes are approved.
+- **Design Token Discipline**: Frontend styling in Angular strictly adheres to semantic CSS variables and design tokens.
+- **Sub-agent Orchestration**: Tasks are executed with dedicated, ephemeral sub-agents (`/vibecode-workflow`) to prevent context drift and skill forgetting.
+
+> [!TIP]
+> **Supercharge your AI development workflow:**  
+> If you build applications with **Claude Code**, **Google Antigravity**, or **Cursor**, check out [**lysari/vibecode-skills**](https://github.com/lysari/vibecode-skills) to make your AI agents code like careful, experienced engineers.
 
 ## Shortcuts
 

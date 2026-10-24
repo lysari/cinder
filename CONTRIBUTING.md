@@ -42,6 +42,12 @@ bun run typecheck     # Typechecks Bun backend, workers, and Angular templates (
 bun run test          # Runs test suite with bun:test
 ```
 
+## AI-assisted development with Vibecode
+
+If you develop or contribute using AI coding assistants (such as Claude Code, Google Antigravity, or Cursor):
+- Install and activate **[Vibecode Skills](https://github.com/lysari/vibecode-skills)**.
+- Follow the instructions in [`cinder/AGENTS.md`](cinder/AGENTS.md) and execute tasks using `/vibecode-workflow` to ensure compliance with `.agents/project-rules.md`.
+
 ## Pull request guidelines
 
 - Keep each pull request focused on a single feature or bug fix.
