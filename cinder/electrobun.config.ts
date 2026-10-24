@@ -1,8 +1,9 @@
 import type { ElectrobunConfig } from "electrobun";
 import { join } from "node:path";
-import { version } from "./package.json";
+import pkg from "./package.json";
 import { BUILT_IN_OAUTH_CLIENT_FILE, readBuiltInOAuthClient } from "./scripts/built-in-oauth-client";
 
+const { version } = pkg;
 const builtInOAuthClient = await readBuiltInOAuthClient(join(import.meta.dir, BUILT_IN_OAUTH_CLIENT_FILE));
 
 export default {
